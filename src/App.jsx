@@ -223,6 +223,7 @@ function LoginModal({onClose,onLogin,setToast}){
 function Home({boxes,shopConfig,setView,setActiveBox,loading}){
   const [cat,setCat]=useState("Todos");
   const cats=["Todos",...[...new Set(boxes.filter(b=>b.active&&b.cat).map(b=>b.cat))]];
+  // Also merge with admin-defined categories for consistent display
   const visible=boxes.filter(b=>b.active).filter(b=>cat==="Todos"||b.cat===cat);
   const available=boxes.filter(b=>!b.active);
   const activeBanners=(shopConfig?.banners||[]).filter(b=>b.active);
@@ -308,7 +309,16 @@ function Home({boxes,shopConfig,setView,setActiveBox,loading}){
         <div style={{display:"flex",gap:8,marginBottom:32,flexWrap:"wrap",alignItems:"center"}}>
           <span className="bebas" style={{fontSize:18,color:C.muted,letterSpacing:2,marginRight:4}}>FILTRAR:</span>
           {cats.map(c=>{const active=cat===c;const [c1,c2]=c==="Todos"?[C.electric,C.deep]:catGrad(c);return(
-            <button key={c} className="btn" onClick={()=>setCat(c)} style={{padding:"7px 16px",fontSize:12,fontWeight:700,background:active?`linear-gradient(135deg,${c1},${c2})`:"rgba(255,255,255,.05)",color:active?"#fff":C.muted,border:`1.5px solid ${active?"transparent":"rgba(255,255,255,.1)"}`,boxShadow:active?"0 4px 16px rgba(0,0,0,.3)":"none"}}>{c}</button>
+            <button key={c} className="btn" onClick={()=>setCat(c)}
+              style={{padding:"8px 20px",fontSize:12,fontWeight:700,
+                background:active?`linear-gradient(135deg,${c1},${c2})`:"rgba(255,255,255,.05)",
+                color:active?"#fff":C.muted,
+                border:`1.5px solid ${active?"transparent":"rgba(255,255,255,.08)"}`,
+                boxShadow:active?`0 4px 20px ${c1}55`:"none",
+                borderRadius:30,letterSpacing:.3,
+                transition:"all .25s cubic-bezier(.34,1.56,.64,1)"}}>
+              {c}
+            </button>
           );})}
         </div>
         {loading?<Spinner label="Cargando boxes..."/>
@@ -348,7 +358,7 @@ function Home({boxes,shopConfig,setView,setActiveBox,loading}){
             </div>
           );})}
         </div>}
-        {available.length>0&&<div style={{marginTop:32,padding:"16px 24px",background:"rgba(255,255,255,.03)",border:"1px dashed rgba(255,255,255,.1)",borderRadius:16,textAlign:"center"}}><p style={{color:C.dim,fontSize:13,fontWeight:600}}>🏪 {available.map(b=>boxLabel(b.box_numbers)).join(" · ")} — Disponibles para alquilar</p></div>}
+{/* boxes disponibles no se muestran en la home - solo el admin los ve */}
       </div>
     </div>
   );
@@ -458,7 +468,12 @@ function Catalog({boxId,boxes,products,cart,addToCart,setView,setActiveBox,loadi
             {box.hours&&<p style={{color:C.muted,fontSize:12,marginTop:6,fontWeight:600}}>🕐 {box.hours}</p>}
             {box.whatsapp&&<a href={"https://wa.me/549"+box.whatsapp.replace(/\D/g,"")} target="_blank" rel="noreferrer" style={{display:"inline-flex",alignItems:"center",gap:7,background:"rgba(37,211,102,.12)",border:"1px solid rgba(37,211,102,.25)",borderRadius:10,padding:"7px 14px",fontSize:13,fontWeight:700,color:"#25D366",textDecoration:"none",marginTop:8}}>💬 Consultar por WhatsApp</a>}
           </div>
-          <div>{box.delivery?<span style={{background:"rgba(0,230,118,.12)",color:C.success,fontWeight:800,fontSize:13,padding:"10px 16px",borderRadius:12,display:"block",border:"1px solid rgba(0,230,118,.2)"}}>🚚 {box.delivery_cost===0?"Envío gratis":`Envío ${fmt(box.delivery_cost)}`}</span>:<span style={{background:"rgba(255,255,255,.06)",color:C.muted,fontWeight:600,fontSize:13,padding:"10px 16px",borderRadius:12,display:"block"}}>📦 Solo retiro en box</span>}</div>
+          <div style={{display:"flex",flexDirection:"column",gap:8,alignItems:"flex-end"}}>
+            {box.delivery
+              ?<span style={{background:"rgba(0,230,118,.12)",color:C.success,fontWeight:800,fontSize:13,padding:"10px 16px",borderRadius:12,display:"block",border:"1px solid rgba(0,230,118,.2)"}}>🚚 {box.delivery_cost===0?"Envío gratis":`Envío ${fmt(box.delivery_cost)}`}</span>
+              :<span style={{background:"rgba(255,255,255,.06)",color:C.muted,fontWeight:600,fontSize:13,padding:"10px 16px",borderRadius:12,display:"block"}}>📦 Solo retiro en box</span>}
+            {box.courier_name&&<span style={{background:"rgba(0,194,255,.08)",color:C.electric,fontWeight:700,fontSize:11,padding:"6px 12px",borderRadius:10,display:"block",border:"1px solid rgba(0,194,255,.15)"}}>📦 {box.courier_name}{box.courier_desc?" · "+box.courier_desc:""}</span>}
+          </div>
         </div>
       </div>
 
@@ -586,7 +601,17 @@ function BoxPanel({user,boxes,setBoxes,products,setProducts,setToast}){
   const saveInfo=async()=>{
     setSaving(true);
     try{
-      await sb.from("boxes").update(info,`id=eq.${box.id}`);
+      const toSave={...info};
+      // Only save fields that exist in DB
+      await sb.from("boxes").update({
+        business_name:toSave.business_name,
+        description:toSave.description,
+        hours:toSave.hours,
+        delivery:toSave.delivery,
+        delivery_cost:toSave.delivery_cost,
+        delivery_note:toSave.delivery_note,
+        mp_link:toSave.mp_link,
+      },`id=eq.${box.id}`);
       setBoxes(p=>p.map(b=>b.id===box.id?{...b,...info}:b));
       showT("✓ Información actualizada");
     }catch(e){showT("❌ Error guardando");}
@@ -710,14 +735,38 @@ function BoxPanel({user,boxes,setBoxes,products,setProducts,setToast}){
         <button className="btn" onClick={saveInfo} disabled={saving} style={{background:`linear-gradient(135deg,${c1},${c2})`,color:"#fff",padding:"11px 24px",fontSize:14}}>Guardar cambios</button>
       </div>}
       {tab==="envio"&&<div style={{background:"rgba(255,255,255,.04)",border:"1px solid rgba(255,255,255,.08)",borderRadius:16,padding:24}}>
-        <div style={{display:"flex",gap:12,marginBottom:18}}>
-          {[true,false].map(v=><div key={String(v)} onClick={()=>setInfo({...info,delivery:v})} style={{flex:1,padding:"18px",borderRadius:14,border:`2px solid ${info.delivery===v?c1:"rgba(255,255,255,.1)"}`,cursor:"pointer",background:info.delivery===v?`${c1}18`:"rgba(255,255,255,.03)",textAlign:"center",transition:"all .18s"}}><div style={{fontSize:32,marginBottom:8}}>{v?"🚚":"📦"}</div><p style={{fontWeight:800,fontSize:14,color:info.delivery===v?C.electric:C.muted}}>{v?"Ofrezco envío":"Solo retiro"}</p></div>)}
+        <h3 style={{fontWeight:800,fontSize:17,marginBottom:6}}>🚚 Opciones de envío</h3>
+        <p style={{color:C.muted,fontSize:13,marginBottom:18,lineHeight:1.6}}>Configurá cómo hacés llegar tus productos a los clientes.</p>
+        {/* Selector retiro/envío */}
+        <div style={{display:"flex",gap:12,marginBottom:20}}>
+          {[true,false].map(v=>(
+            <div key={String(v)} onClick={()=>setInfo({...info,delivery:v})}
+              style={{flex:1,padding:"18px",borderRadius:16,border:`2px solid ${info.delivery===v?c1:"rgba(255,255,255,.1)"}`,cursor:"pointer",background:info.delivery===v?`${c1}18`:"rgba(255,255,255,.03)",textAlign:"center",transition:"all .18s",position:"relative"}}>
+              {info.delivery===v&&<div style={{position:"absolute",top:10,right:10,width:18,height:18,background:`linear-gradient(135deg,${c1},${c2})`,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10}}>✓</div>}
+              <div style={{fontSize:36,marginBottom:8}}>{v?"🚚":"📦"}</div>
+              <p style={{fontWeight:800,fontSize:14,color:info.delivery===v?C.electric:C.muted}}>{v?"Ofrezco envío":"Solo retiro en box"}</p>
+              <p style={{fontSize:11,color:C.dim,marginTop:4}}>{v?"Los clientes pueden recibir en casa":"Los clientes pasan a buscar"}</p>
+            </div>
+          ))}
         </div>
-        {info.delivery&&<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:14}}>
-          <div><Lbl>Costo ($0 = gratis)</Lbl><input className="inp" type="number" value={info.delivery_cost} onChange={e=>setInfo({...info,delivery_cost:Number(e.target.value)})}/></div>
-          <div><Lbl>Nota de envío</Lbl><input className="inp" value={info.delivery_note} onChange={e=>setInfo({...info,delivery_note:e.target.value})}/></div>
-        </div>}
-        <button className="btn" onClick={saveInfo} disabled={saving} style={{background:`linear-gradient(135deg,${c1},${c2})`,color:"#fff",padding:"11px 24px",fontSize:14}}>Guardar</button>
+        {info.delivery&&<>
+          {/* Costo base */}
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:16}}>
+            <div><Lbl>Costo de envío ($0 = gratis)</Lbl><input className="inp" type="number" value={info.delivery_cost} onChange={e=>setInfo({...info,delivery_cost:Number(e.target.value)})}/></div>
+            <div><Lbl>Nota de envío</Lbl><input className="inp" value={info.delivery_note} onChange={e=>setInfo({...info,delivery_note:e.target.value})} placeholder="Ej: Envío gratis en pedidos +$5000"/></div>
+          </div>
+          {/* Convenios de envío */}
+          <div style={{background:"rgba(0,194,255,.06)",border:"1px solid rgba(0,194,255,.15)",borderRadius:14,padding:18,marginBottom:16}}>
+            <p style={{fontWeight:800,fontSize:14,color:C.electric,marginBottom:4}}>📦 Convenios con transportistas</p>
+            <p style={{color:C.muted,fontSize:12,marginBottom:14,lineHeight:1.6}}>Si tenés convenio con algún servicio de envíos, completá los datos para que los clientes lo vean.</p>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
+              <div><Lbl>Servicio de envío</Lbl><input className="inp" value={info.courier_name||""} onChange={e=>setInfo({...info,courier_name:e.target.value})} placeholder="Ej: Andreani, OCA, Correo Arg..."/></div>
+              <div><Lbl>Costo del convenio</Lbl><input className="inp" type="number" value={info.courier_cost||""} onChange={e=>setInfo({...info,courier_cost:Number(e.target.value)})} placeholder="0 = gratis con convenio"/></div>
+            </div>
+            <div style={{marginTop:10}}><Lbl>Descripción del servicio</Lbl><input className="inp" value={info.courier_desc||""} onChange={e=>setInfo({...info,courier_desc:e.target.value})} placeholder="Ej: Envío a todo el país en 3-5 días hábiles"/></div>
+          </div>
+        </>}
+        <button className="btn" onClick={saveInfo} disabled={saving} style={{background:`linear-gradient(135deg,${c1},${c2})`,color:"#fff",padding:"12px 28px",fontSize:14,boxShadow:`0 4px 16px rgba(0,0,0,.3)`}}>Guardar configuración de envío</button>
       </div>}
       {tab==="pago"&&<div style={{background:"rgba(255,255,255,.04)",border:"1px solid rgba(255,255,255,.08)",borderRadius:16,padding:24}}>
         <h3 style={{fontWeight:800,fontSize:17,marginBottom:6}}>Link de Mercado Pago</h3>
@@ -748,7 +797,8 @@ function AdminPanel({boxes,setBoxes,products,setProducts,shopConfig,setShopConfi
   const [editHours,setEditHours]=useState(null);
   const [newBanner,setNewBanner]=useState({text:"",color:"linear-gradient(135deg,#FFD200,#FF6F00)",active:true});
   const showT=msg=>{setToast(msg);setTimeout(()=>setToast(""),2500);};
-  const CATS=["Moda","Gastronomía","Tecnología","Belleza","Deportes","Calzado","Hogar","Lencería","Otra"];
+  const CATS=(shopConfig.categories||["Moda","Gastronomía","Tecnología","Belleza","Deportes","Calzado","Hogar","Lencería","Otra"]);
+  const [newCat,setNewCat]=useState("");
 
   const saveEdit=async()=>{
     setSaving(true);
@@ -802,7 +852,7 @@ function AdminPanel({boxes,setBoxes,products,setProducts,shopConfig,setShopConfi
 
   const saveConfig=async(cfg)=>{
     setShopConfig(cfg);
-    await sb.from("shopping_config").update({hours:cfg.hours,banners:cfg.banners},`id=eq.1`);
+    await sb.from("shopping_config").update({hours:cfg.hours,banners:cfg.banners,categories:cfg.categories||[]},`id=eq.1`);
   };
 
   return(
@@ -868,6 +918,26 @@ function AdminPanel({boxes,setBoxes,products,setProducts,shopConfig,setShopConfi
       </div>}
 
       {tab==="shopping"&&<div style={{display:"flex",flexDirection:"column",gap:16}}>
+        {/* CATEGORÍAS EDITABLES */}
+        <div style={{background:"rgba(255,255,255,.04)",border:"1px solid rgba(255,255,255,.08)",borderRadius:16,padding:24}}>
+          <h3 style={{fontWeight:800,fontSize:16,marginBottom:4}}>🏷️ Categorías de boxes</h3>
+          <p style={{color:C.muted,fontSize:12,marginBottom:18}}>Estas son las categorías que aparecen como filtros en la página principal y en los selectores de los boxes.</p>
+          <div style={{display:"flex",flexWrap:"wrap",gap:8,marginBottom:16}}>
+            {(shopConfig.categories||["Moda","Gastronomía","Tecnología","Belleza","Deportes","Calzado","Hogar","Lencería","Otra"]).map((cat,i)=>{
+              const [c1,c2]=catGrad(cat);
+              return(
+                <div key={i} style={{display:"flex",alignItems:"center",gap:6,background:`linear-gradient(135deg,${c1}22,${c2}11)`,border:`1px solid ${c1}44`,borderRadius:20,padding:"5px 6px 5px 14px"}}>
+                  <span style={{fontSize:12,fontWeight:700,color:C.light}}>{cat}</span>
+                  <button className="btn" onClick={()=>{const cats=(shopConfig.categories||["Moda","Gastronomía","Tecnología","Belleza","Deportes","Calzado","Hogar","Lencería","Otra"]).filter((_,j)=>j!==i);saveConfig({...shopConfig,categories:cats});}} style={{background:"rgba(255,23,68,.2)",color:C.danger,width:20,height:20,borderRadius:"50%",fontSize:11,display:"flex",alignItems:"center",justifyContent:"center",padding:0,flexShrink:0}}>✕</button>
+                </div>
+              );
+            })}
+          </div>
+          <div style={{display:"flex",gap:9}}>
+            <input className="inp" value={newCat} onChange={e=>setNewCat(e.target.value)} placeholder="Nueva categoría (ej: Juguetes)" style={{flex:1}} onKeyDown={e=>{if(e.key==="Enter"&&newCat.trim()){const cats=[...(shopConfig.categories||["Moda","Gastronomía","Tecnología","Belleza","Deportes","Calzado","Hogar","Lencería","Otra"]),newCat.trim()];saveConfig({...shopConfig,categories:cats});setNewCat("");}}}/>
+            <button className="btn" onClick={()=>{if(!newCat.trim())return;const cats=[...(shopConfig.categories||["Moda","Gastronomía","Tecnología","Belleza","Deportes","Calzado","Hogar","Lencería","Otra"]),newCat.trim()];saveConfig({...shopConfig,categories:cats});setNewCat("");}} style={{background:"linear-gradient(135deg,#00C2FF,#0044AA)",color:"#fff",padding:"10px 18px",fontSize:13,flexShrink:0}}>+ Agregar</button>
+          </div>
+        </div>
         <div style={{background:"rgba(255,255,255,.04)",border:"1px solid rgba(255,255,255,.08)",borderRadius:16,padding:24}}>
           <h3 style={{fontWeight:800,fontSize:16,marginBottom:18}}>🕐 Horarios del shopping</h3>
           {(shopConfig.hours||[]).map((h,i)=>(<div key={i} style={{display:"flex",gap:10,marginBottom:10,alignItems:"center"}}>
