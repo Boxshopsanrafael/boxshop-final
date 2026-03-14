@@ -3,8 +3,8 @@ import { useState, useEffect, useRef } from "react";
 // ─── SUPABASE CONFIG ──────────────────────────────────────────────────────────
 // REEMPLAZÁ estos dos valores con los tuyos de Supabase
 // Los encontrás en: Supabase → tu proyecto → Settings → API
-const SUPABASE_URL = "https://jnmbftanbytarnv.supabase.co";
-const SUPABASE_ANON_KEY = "sb_publishable_w4GKw4GKzdDILyD8czhn0g_fVxfxG_I";
+const SUPABASE_URL = "https://jnmbftanbytarnvfvczc.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpubWJmdGFuYnl0YXJudmZ2Y3pjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0Mjk4NjcsImV4cCI6MjA4OTAwNTg2N30.3lmepF-0SWbS5LXjGXC3p_8Tna2lN73jsiQtTvIgIrQ";
 
 // Cliente Supabase liviano (sin instalar paquete)
 const sb = {
