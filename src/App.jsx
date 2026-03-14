@@ -3,8 +3,8 @@ import { useState, useEffect, useRef } from "react";
 // ─── SUPABASE CONFIG ──────────────────────────────────────────────────────────
 // REEMPLAZÁ estos dos valores con los tuyos de Supabase
 // Los encontrás en: Supabase → tu proyecto → Settings → API
-const SUPABASE_URL = "https://TU_PROYECTO.supabase.co";
-const SUPABASE_ANON_KEY = "TU_ANON_KEY";
+const SUPABASE_URL = "https://jnmbftanbytarnvfvczc.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_w4GKw4GKzdDILyD8czhn0g_fVxfxG_I";
 
 // Cliente Supabase liviano (sin instalar paquete)
 const sb = {
@@ -161,7 +161,7 @@ function Nav({view,setView,setActiveBox,cartN,user,onLogout,onLoginClick}){
         </div>
         <div style={{display:"flex",gap:8,alignItems:"center"}}>
           <a className="ig hm" href={IG} target="_blank" rel="noreferrer" style={{padding:"8px 14px",fontSize:12}}><IgSvg s={13}/>Instagram</a>
-          <button className="btn" onClick={()=>setView("home")} style={{padding:"8px 14px",fontSize:12,background:view==="home"?"rgba(0,194,255,0.15)":"transparent",color:view==="home"?C.electric:C.muted,border:`1.5px solid ${view==="home"?"rgba(0,194,255,0.4)":"rgba(255,255,255,0.1)"}`,display:"flex",alignItems:"center",gap:6}}>🏬 <span className="hm">Boxes</span></button>
+          <button className="btn" onClick={()=>setView("home")} style={{padding:"8px 14px",fontSize:12,background:view==="home"?"rgba(0,194,255,0.15)":"transparent",color:view==="home"?C.electric:C.muted,border:`1.5px solid ${view==="home"?"rgba(0,194,255,0.4)":"rgba(255,255,255,0.1)"}`,display:"flex",alignItems:"center",gap:6}}>🏬 <span className="hm">Box</span></button>
           <button className="btn" onClick={()=>setView("cart")} style={{padding:"8px 14px",fontSize:12,background:view==="cart"?"rgba(0,194,255,0.15)":"transparent",color:view==="cart"?C.electric:C.muted,border:`1.5px solid ${view==="cart"?"rgba(0,194,255,0.4)":"rgba(255,255,255,0.1)"}`,position:"relative",display:"flex",alignItems:"center",gap:6}}>
             🛒 <span className="hm">Carrito</span>
             {cartN>0&&<span style={{position:"absolute",top:-6,right:-6,background:`linear-gradient(135deg,${C.gold},${C.goldDark})`,color:"#000",borderRadius:"50%",width:18,height:18,fontSize:10,fontWeight:900,display:"flex",alignItems:"center",justifyContent:"center"}}>{cartN}</span>}
@@ -277,7 +277,7 @@ function Home({boxes,shopConfig,setView,setActiveBox,loading}){
       {/* STATS */}
       <div style={{background:"linear-gradient(135deg,#001B4E,#000B1E)",borderBottom:"1px solid rgba(0,194,255,.15)"}}>
         <div style={{maxWidth:1280,margin:"0 auto",padding:"14px 24px",display:"flex",gap:32,justifyContent:"center",flexWrap:"wrap"}}>
-          {[[boxes.filter(b=>b.active).length+"","Boxes activos","⚡"],[boxes.filter(b=>b.delivery&&b.active).length+"","Con envío","🚚"],["31","Boxes totales","🏬"]].map(([n,l,ic])=>(
+          {[[boxes.filter(b=>b.active).length+"","Box activos","⚡"],[boxes.filter(b=>b.delivery&&b.active).length+"","Con envío","🚚"],["31","Box totales","🏬"]].map(([n,l,ic])=>(
             <div key={l} style={{textAlign:"center",display:"flex",alignItems:"center",gap:10}}><span style={{fontSize:22}}>{ic}</span><div><div className="bebas" style={{fontSize:26,color:C.electric,lineHeight:1}}>{n}</div><div style={{fontSize:10,color:C.muted,letterSpacing:1,textTransform:"uppercase"}}>{l}</div></div></div>
           ))}
         </div>
@@ -315,28 +315,36 @@ function Home({boxes,shopConfig,setView,setActiveBox,loading}){
         :<div className="sg" style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))",gap:20}}>
           {visible.map(box=>{const [c1,c2]=catGrad(box.cat);return(
             <div key={box.id} className="box-card" onClick={()=>{setActiveBox(box.id);setView("catalog");}}
-              style={{background:"linear-gradient(145deg,rgba(255,255,255,.07),rgba(255,255,255,.03))",border:"1px solid rgba(255,255,255,.08)",borderRadius:20,overflow:"hidden",position:"relative"}}>
-              <div style={{height:120,background:`linear-gradient(135deg,${c1}33,${c2}55)`,position:"relative",display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden"}}>
-                <div style={{position:"absolute",inset:0,background:`radial-gradient(circle at 70% 50%,${c1}44,transparent 60%)`}}/>
-                {box.logo_url?<img src={box.logo_url} alt={box.business_name} style={{width:"100%",height:"100%",objectFit:"cover",position:"absolute",inset:0}}/>
-                  :<span style={{fontSize:56,position:"relative",filter:"drop-shadow(0 4px 12px rgba(0,0,0,.4))",animation:"float 4s ease infinite"}}>{box.emoji}</span>}
-                <div style={{position:"absolute",top:12,left:12,background:`linear-gradient(135deg,${c1},${c2})`,borderRadius:8,padding:"3px 10px",fontSize:11,fontWeight:900}}>{boxLabel(box.box_numbers)}</div>
-                {box.cat&&<div style={{position:"absolute",top:12,right:12,background:"rgba(0,0,0,.5)",backdropFilter:"blur(8px)",borderRadius:8,padding:"3px 10px",fontSize:10,fontWeight:700,letterSpacing:.8,textTransform:"uppercase"}}>{box.cat}</div>}
+              style={{background:"#fff",borderRadius:20,overflow:"hidden",position:"relative",boxShadow:"0 4px 20px rgba(0,0,0,.2)"}}>
+              {/* Header con foto/logo */}
+              <div style={{height:140,background:`linear-gradient(135deg,${c1},${c2})`,position:"relative",display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden"}}>
+                <div style={{position:"absolute",inset:0,background:`radial-gradient(circle at 30% 50%,rgba(255,255,255,.15),transparent 60%)`}}/>
+                {box.logo_url
+                  ?<img src={box.logo_url} alt={box.business_name} style={{width:"100%",height:"100%",objectFit:"cover",position:"absolute",inset:0}}/>
+                  :<span style={{fontSize:64,filter:"drop-shadow(0 4px 16px rgba(0,0,0,.3))",animation:"float 4s ease infinite",position:"relative"}}>{box.emoji}</span>}
+                {/* Badge número */}
+                <div style={{position:"absolute",top:12,left:12,background:"rgba(0,0,0,.4)",backdropFilter:"blur(8px)",borderRadius:20,padding:"4px 12px",fontSize:11,fontWeight:900,color:"#fff",border:"1px solid rgba(255,255,255,.2)"}}>{boxLabel(box.box_numbers)}</div>
+                {/* Badge categoría */}
+                {box.cat&&<div style={{position:"absolute",top:12,right:12,background:"rgba(255,255,255,.2)",backdropFilter:"blur(8px)",borderRadius:20,padding:"4px 12px",fontSize:10,fontWeight:800,color:"#fff",letterSpacing:.8,textTransform:"uppercase",border:"1px solid rgba(255,255,255,.25)"}}>{box.cat}</div>}
+                {/* WhatsApp flotante */}
+                {box.whatsapp&&<a href={"https://wa.me/549"+box.whatsapp.replace(/\D/g,"")} target="_blank" rel="noreferrer" onClick={e=>e.stopPropagation()}
+                  style={{position:"absolute",bottom:12,right:12,background:"#25D366",borderRadius:"50%",width:36,height:36,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,textDecoration:"none",boxShadow:"0 4px 12px rgba(37,211,102,.5)",transition:"transform .2s",zIndex:2}}
+                  onMouseEnter={e=>e.currentTarget.style.transform="scale(1.2)"} onMouseLeave={e=>e.currentTarget.style.transform="scale(1)"}>💬</a>}
               </div>
-              <div style={{padding:"18px 18px 16px"}}>
-                <h3 style={{fontSize:17,fontWeight:800,marginBottom:5,lineHeight:1.2}}>{box.business_name}</h3>
-                {box.hours&&<p style={{color:C.muted,fontSize:12,fontWeight:500,marginBottom:6}}>🕐 {box.hours}</p>}
-                <p style={{color:"rgba(255,255,255,.45)",fontSize:12,lineHeight:1.5,marginBottom:14}}>{box.description}</p>
+              {/* Contenido */}
+              <div style={{padding:"16px 18px 18px"}}>
+                <h3 style={{fontSize:16,fontWeight:900,marginBottom:4,color:"#1a1a2e",lineHeight:1.2}}>{box.business_name}</h3>
+                {box.hours&&<p style={{color:"#888",fontSize:11,fontWeight:600,marginBottom:6,display:"flex",alignItems:"center",gap:4}}>🕐 {box.hours}</p>}
+                <p style={{color:"#aaa",fontSize:12,lineHeight:1.5,marginBottom:14}}>{box.description}</p>
                 <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                  {box.delivery?<span style={{fontSize:11,fontWeight:700,color:C.success,background:"rgba(0,230,118,.12)",padding:"4px 10px",borderRadius:8,border:"1px solid rgba(0,230,118,.2)"}}>{box.delivery_cost===0?"🚚 Envío gratis":`🚚 Envío ${fmt(box.delivery_cost)}`}</span>
-                    :<span style={{fontSize:11,fontWeight:600,color:C.muted,background:"rgba(255,255,255,.05)",padding:"4px 10px",borderRadius:8}}>📦 Solo retiro</span>}
-                  <div style={{display:"flex",alignItems:"center",gap:8}}>
-                    {box.whatsapp&&<a href={"https://wa.me/549"+box.whatsapp.replace(/\D/g,"")} target="_blank" rel="noreferrer" onClick={e=>e.stopPropagation()} style={{background:"#25D366",borderRadius:8,width:30,height:30,display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,textDecoration:"none",flexShrink:0,boxShadow:"0 2px 8px rgba(37,211,102,.4)",transition:"transform .2s"}} onMouseEnter={e=>e.currentTarget.style.transform="scale(1.15)"} onMouseLeave={e=>e.currentTarget.style.transform="scale(1)"}>💬</a>}
-                    <span style={{fontSize:12,fontWeight:700,color:C.electric,display:"flex",alignItems:"center",gap:4}}>Ver catálogo <span style={{fontSize:16}}>→</span></span>
-                  </div>
+                  {box.delivery
+                    ?<span style={{fontSize:11,fontWeight:700,color:"#00A152",background:"rgba(0,200,80,.1)",padding:"5px 12px",borderRadius:20,border:"1px solid rgba(0,200,80,.2)"}}>{box.delivery_cost===0?"🚚 Envío gratis":`🚚 Envío ${fmt(box.delivery_cost)}`}</span>
+                    :<span style={{fontSize:11,fontWeight:600,color:"#999",background:"#f5f5f5",padding:"5px 12px",borderRadius:20}}>📦 Solo retiro</span>}
+                  <span style={{fontSize:12,fontWeight:800,color:c1,display:"flex",alignItems:"center",gap:4}}>Ver box →</span>
                 </div>
               </div>
-              <div style={{height:2,background:`linear-gradient(90deg,transparent,${c1},transparent)`}}/>
+              {/* Barra de color abajo */}
+              <div style={{height:3,background:`linear-gradient(90deg,${c1},${c2})`}}/>
             </div>
           );})}
         </div>}
@@ -805,11 +813,11 @@ function AdminPanel({boxes,setBoxes,products,setProducts,shopConfig,setShopConfi
         <div>
           <p style={{color:"rgba(167,139,250,.7)",fontSize:10,fontWeight:700,letterSpacing:3,textTransform:"uppercase",marginBottom:2}}>PANEL DE ADMINISTRACIÓN · SUPABASE CONECTADO</p>
           <h1 className="bebas" style={{fontSize:38,letterSpacing:2,background:"linear-gradient(135deg,#fff,#A78BFA)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>BOX SHOP · ADMIN</h1>
-          <p style={{color:"rgba(167,139,250,.6)",fontSize:13,marginTop:2}}>{boxes.length} boxes · {boxes.filter(b=>b.active).length} activos · {boxes.filter(b=>!b.active).length} disponibles</p>
+          <p style={{color:"rgba(167,139,250,.6)",fontSize:13,marginTop:2}}>{boxes.length} box · {boxes.filter(b=>b.active).length} activos · {boxes.filter(b=>!b.active).length} disponibles</p>
         </div>
       </div>
       <div style={{display:"flex",gap:0,marginBottom:24,background:"rgba(255,255,255,.04)",border:"1px solid rgba(255,255,255,.08)",borderRadius:14,overflow:"hidden",width:"fit-content"}}>
-        {[["boxes","🏬 Boxes"],["crear","➕ Crear"],["shopping","⚙️ Shopping"]].map(([t,lb],i,a)=><button key={t} className="btn" onClick={()=>setTab(t)} style={{padding:"11px 22px",fontSize:13,background:tab===t?"linear-gradient(135deg,#6D28D9,#4C1D95)":"transparent",color:tab===t?"#fff":C.muted,borderRadius:0,borderRight:i<a.length-1?"1px solid rgba(255,255,255,.06)":"none"}}>{lb}</button>)}
+        {[["boxes","🏬 Box"],["crear","➕ Crear"],["shopping","⚙️ Shopping"]].map(([t,lb],i,a)=><button key={t} className="btn" onClick={()=>setTab(t)} style={{padding:"11px 22px",fontSize:13,background:tab===t?"linear-gradient(135deg,#6D28D9,#4C1D95)":"transparent",color:tab===t?"#fff":C.muted,borderRadius:0,borderRight:i<a.length-1?"1px solid rgba(255,255,255,.06)":"none"}}>{lb}</button>)}
       </div>
 
       {tab==="boxes"&&<div style={{display:"flex",flexDirection:"column",gap:10}}>
