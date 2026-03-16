@@ -3,38 +3,63 @@ import { useState, useEffect, useRef } from "react";
 // ─── SUPABASE CONFIG ──────────────────────────────────────────────────────────
 // REEMPLAZÁ estos dos valores con los tuyos de Supabase
 // Los encontrás en: Supabase → tu proyecto → Settings → API
-const SUPABASE_URL = "https://jnmbftanbytarnvfvczc.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpubWJmdGFuYnl0YXJudmZ2Y3pjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0Mjk4NjcsImV4cCI6MjA4OTAwNTg2N30.3lmepF-0SWbS5LXjGXC3p_8Tna2lN73jsiQtTvIgIrQ";
+const SUPABASE_URL = "https://jnmbftanbytarnvfvczc.co";
+const SUPABASE_ANON_KEY = "sb_publishable_w4GKw4GKzdDILyD8czhn0g_fVxfxG_I";
 
-// Cliente Supabase liviano (sin instalar paquete)
+// Cliente Supabase liviano — compatible con claves nuevas y legacy
+const sbHeaders = (extra={}) => ({
+  "apikey": SUPABASE_ANON_KEY,
+  "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+  ...extra
+});
+
 const sb = {
   from: (table) => ({
-    _table: table,
-    select: (cols="*") => fetch(`${SUPABASE_URL}/rest/v1/${table}?select=${cols}&order=box_numbers`, {
-      headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}`, "Content-Type": "application/json" }
-    }).then(r=>r.json()),
-    selectWhere: (cols="*", filter="") => fetch(`${SUPABASE_URL}/rest/v1/${table}?select=${cols}&${filter}`, {
-      headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}`, "Content-Type": "application/json" }
-    }).then(r=>r.json()),
-    insert: (data) => fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
-      method:"POST", headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}`, "Content-Type":"application/json", Prefer:"return=representation" },
-      body: JSON.stringify(data)
-    }).then(r=>r.json()),
-    update: (data, filter) => fetch(`${SUPABASE_URL}/rest/v1/${table}?${filter}`, {
-      method:"PATCH", headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}`, "Content-Type":"application/json", Prefer:"return=representation" },
-      body: JSON.stringify(data)
-    }).then(r=>r.json()),
-    delete: (filter) => fetch(`${SUPABASE_URL}/rest/v1/${table}?${filter}`, {
-      method:"DELETE", headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` }
-    }),
-    upload: (bucket, path, file) => fetch(`${SUPABASE_URL}/storage/v1/object/${bucket}/${path}`, {
-      method:"POST", headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` },
-      body: file
-    }).then(r=>r.json()),
+    select: (cols="*") => fetch(
+      `${SUPABASE_URL}/rest/v1/${table}?select=${cols}&order=box_numbers`,
+      { headers: sbHeaders({"Content-Type":"application/json"}) }
+    ).then(async r=>{ const d=await r.json(); if(!r.ok) throw d; return d; }),
+
+    selectWhere: (cols="*", filter="") => fetch(
+      `${SUPABASE_URL}/rest/v1/${table}?select=${cols}&${filter}`,
+      { headers: sbHeaders({"Content-Type":"application/json"}) }
+    ).then(async r=>{ const d=await r.json(); if(!r.ok) throw d; return d; }),
+
+    insert: (data) => fetch(
+      `${SUPABASE_URL}/rest/v1/${table}`,
+      { method:"POST", headers: sbHeaders({"Content-Type":"application/json","Prefer":"return=representation"}), body: JSON.stringify(data) }
+    ).then(async r=>{ const d=await r.json(); if(!r.ok) throw d; return d; }),
+
+    update: (data, filter) => fetch(
+      `${SUPABASE_URL}/rest/v1/${table}?${filter}`,
+      { method:"PATCH", headers: sbHeaders({"Content-Type":"application/json","Prefer":"return=representation"}), body: JSON.stringify(data) }
+    ).then(async r=>{ const d=await r.json(); if(!r.ok) throw d; return d; }),
+
+    delete: (filter) => fetch(
+      `${SUPABASE_URL}/rest/v1/${table}?${filter}`,
+      { method:"DELETE", headers: sbHeaders() }
+    ).then(r=>r.ok),
   }),
-  storage: (bucket) => ({
-    publicUrl: (path) => `${SUPABASE_URL}/storage/v1/object/public/${bucket}/${path}`,
-  })
+
+  storage: {
+    upload: async (path, file) => {
+      // Try PUT first (upsert), then POST
+      const res = await fetch(
+        `${SUPABASE_URL}/storage/v1/object/box-images/${path}`,
+        { method:"POST", headers: sbHeaders({"x-upsert":"true","Content-Type":file.type}), body: file }
+      );
+      if(!res.ok){
+        // Try with PUT
+        const res2 = await fetch(
+          `${SUPABASE_URL}/storage/v1/object/box-images/${path}`,
+          { method:"PUT", headers: sbHeaders({"Content-Type":file.type}), body: file }
+        );
+        return res2.ok;
+      }
+      return true;
+    },
+    publicUrl: (path) => `${SUPABASE_URL}/storage/v1/object/public/box-images/${path}`,
+  }
 };
 
 const IG  = "https://www.instagram.com/boxshop.sanrafael";
@@ -230,7 +255,7 @@ function LoginModal({onClose,onLogin,setToast}){
     setLoading(true); setErr("");
     if(email.trim()===ADMIN_EMAIL&&pass===ADMIN_PASS) return onLogin({email:ADMIN_EMAIL,is_admin:true,business_name:"Administrador",id:"admin"});
     try{
-      const boxes=await sb.from("boxes").selectWhere("*",`email=eq.${encodeURIComponent(email.trim())}`);
+      const boxes=await sb.from("boxes").selectWhere("*",`email=eq.${email.trim()}`);
       const box=Array.isArray(boxes)&&boxes[0];
       if(box&&box.password_plain===pass) return onLogin({...box,is_admin:false});
       setErr("Email o contraseña incorrectos");
@@ -770,13 +795,14 @@ function BoxPanel({user,boxes,setBoxes,products,setProducts,setToast}){
     setSaving(true);
     try{
       const ext=file.name.split(".").pop();
-      const path=`logos/${box.id}.${ext}`;
-      const res=await fetch(`${SUPABASE_URL}/storage/v1/object/box-images/${path}`,{method:"POST",headers:{apikey:SUPABASE_ANON_KEY,Authorization:`Bearer ${SUPABASE_ANON_KEY}`,"Content-Type":file.type},body:file});
-      const url=`${SUPABASE_URL}/storage/v1/object/public/box-images/${path}`;
+      const path=`logos/${box.id}_${Date.now()}.${ext}`;
+      const ok=await sb.storage.upload(path, file);
+      if(!ok) throw new Error("Upload failed");
+      const url=sb.storage.publicUrl(path);
       await sb.from("boxes").update({logo_url:url},`id=eq.${box.id}`);
       setBoxes(p=>p.map(b=>b.id===box.id?{...b,logo_url:url}:b));
       showT("✓ Logo actualizado");
-    }catch(e){showT("❌ Error subiendo imagen");}
+    }catch(e){showT("❌ Error subiendo imagen. Verificá que el bucket box-images existe en Supabase Storage.");}
     setSaving(false);
   };
 
@@ -785,13 +811,10 @@ function BoxPanel({user,boxes,setBoxes,products,setProducts,setToast}){
     if(!file) return null;
     try{
       const ext=file.name.split(".").pop();
-      const path=`products/${box.id}/${prodId||Date.now()}.${ext}`;
-      await fetch(`${SUPABASE_URL}/storage/v1/object/box-images/${path}`,{
-        method:"POST",
-        headers:{apikey:SUPABASE_ANON_KEY,Authorization:`Bearer ${SUPABASE_ANON_KEY}`,"Content-Type":file.type},
-        body:file
-      });
-      return `${SUPABASE_URL}/storage/v1/object/public/box-images/${path}`;
+      const path=`products/${box.id}/${prodId||Date.now()}_${Date.now()}.${ext}`;
+      const ok=await sb.storage.upload(path, file);
+      if(!ok) return null;
+      return sb.storage.publicUrl(path);
     }catch(e){return null;}
   };
 
