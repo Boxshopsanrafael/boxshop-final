@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 // REEMPLAZÁ estos dos valores con los tuyos de Supabase
 // Los encontrás en: Supabase → tu proyecto → Settings → API
 const SUPABASE_URL = "https://jnmbftanbytarnvfvczc.supabase.co";
-const SUPABASE_ANON_KEY = "sb_publishable_w4GKw4GKzdDILyD8czhn0g_fVxfxG_I";
+const SUPABASE_ANON_KEY = "b_publishable_w4GKw4GKzdDILyD8czhn0g_fVxfxG_I";
 
 // Cliente Supabase liviano (sin instalar paquete)
 const sb = {
@@ -71,38 +71,63 @@ const boxLabel = nums => {
 
 // ─── CSS ──────────────────────────────────────────────────────────────────────
 const CSS = `
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700;800;900&family=Cormorant+Garamond:wght@400;600;700&display=swap');
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Outfit',sans-serif;background:#000B1E;color:#fff;min-height:100vh;}
+html{scroll-behavior:smooth;}
+body{font-family:'Outfit',sans-serif;background:#09090f;color:#fff;min-height:100vh;}
 .bebas{font-family:'Bebas Neue',sans-serif;}
-::-webkit-scrollbar{width:4px;} ::-webkit-scrollbar-track{background:#001B4E;} ::-webkit-scrollbar-thumb{background:#00C2FF;border-radius:4px;}
-.btn{border:none;cursor:pointer;font-family:'Outfit',sans-serif;font-weight:700;border-radius:12px;transition:all .2s cubic-bezier(.34,1.56,.64,1);letter-spacing:.3px;}
-.btn:hover{transform:translateY(-2px);} .btn:active{transform:scale(.95);} .btn:disabled{opacity:.35!important;cursor:not-allowed;transform:none!important;}
-.inp{width:100%;padding:11px 14px;border-radius:10px;border:1.5px solid rgba(0,194,255,0.3);font-size:14px;font-family:'Outfit',sans-serif;outline:none;color:#fff;transition:border .18s,box-shadow .18s;background:rgba(255,255,255,0.06);}
-.inp:focus{border-color:#00C2FF;box-shadow:0 0 0 3px rgba(0,194,255,0.15);} .inp::placeholder{color:rgba(255,255,255,0.3);} select.inp option{background:#001B4E;color:#fff;}
-.glass{background:rgba(255,255,255,.05);backdrop-filter:blur(20px);border:1px solid rgba(0,194,255,.2);}
-.overlay{position:fixed;inset:0;background:rgba(0,5,20,0.8);backdrop-filter:blur(8px);z-index:600;display:flex;align-items:center;justify-content:center;padding:16px;overflow-y:auto;}
-.modal{background:linear-gradient(145deg,#001533,#000D28);border:1px solid rgba(0,194,255,.3);border-radius:24px;padding:32px;width:100%;max-width:460px;box-shadow:0 40px 80px rgba(0,0,0,.6);max-height:92vh;overflow-y:auto;}
-.ig{background:linear-gradient(135deg,#f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%);color:#fff;border:none;border-radius:12px;cursor:pointer;font-family:'Outfit',sans-serif;font-weight:700;display:inline-flex;align-items:center;gap:7px;text-decoration:none;transition:all .2s;}
-.ig:hover{opacity:.88;transform:translateY(-2px);}
-@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
-@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
-@keyframes glow{0%,100%{box-shadow:0 0 20px rgba(0,194,255,.3)}50%{box-shadow:0 0 40px rgba(0,194,255,.7)}}
+.cormorant{font-family:'Cormorant Garamond',serif;}
+::-webkit-scrollbar{width:3px;} ::-webkit-scrollbar-track{background:#09090f;} ::-webkit-scrollbar-thumb{background:rgba(0,194,255,.4);border-radius:4px;}
+.btn{border:none;cursor:pointer;font-family:'Outfit',sans-serif;font-weight:700;border-radius:12px;transition:all .22s cubic-bezier(.34,1.56,.64,1);letter-spacing:.3px;}
+.btn:hover{transform:translateY(-2px);filter:brightness(1.1);} .btn:active{transform:scale(.96);} .btn:disabled{opacity:.3!important;cursor:not-allowed;transform:none!important;filter:none!important;}
+.inp{width:100%;padding:12px 16px;border-radius:12px;border:1.5px solid rgba(255,255,255,.1);font-size:14px;font-family:'Outfit',sans-serif;outline:none;color:#fff;transition:border .18s,box-shadow .18s;background:rgba(255,255,255,.05);}
+.inp:focus{border-color:#00C2FF;box-shadow:0 0 0 3px rgba(0,194,255,.12);background:rgba(0,194,255,.04);} .inp::placeholder{color:rgba(255,255,255,.25);} select.inp option{background:#13131f;color:#fff;}
+.glass{background:rgba(255,255,255,.04);backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,.08);}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(12px);z-index:600;display:flex;align-items:center;justify-content:center;padding:16px;overflow-y:auto;}
+.modal{background:linear-gradient(145deg,#13131f,#0d0d18);border:1px solid rgba(255,255,255,.1);border-radius:24px;padding:36px;width:100%;max-width:480px;box-shadow:0 48px 96px rgba(0,0,0,.8);max-height:92vh;overflow-y:auto;}
+.ig{background:linear-gradient(135deg,#f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%);color:#fff;border:none;border-radius:30px;cursor:pointer;font-family:'Outfit',sans-serif;font-weight:700;display:inline-flex;align-items:center;gap:7px;text-decoration:none;transition:all .2s;}
+.ig:hover{opacity:.9;transform:translateY(-2px);box-shadow:0 8px 24px rgba(220,39,67,.4);}
+/* ANIMACIONES */
+@keyframes fadeUp{from{opacity:0;transform:translateY(32px)}to{opacity:1;transform:none}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@keyframes glow{0%,100%{box-shadow:0 0 24px rgba(0,194,255,.25)}50%{box-shadow:0 0 48px rgba(0,194,255,.6)}}
 @keyframes spin{to{transform:rotate(360deg)}}
-@keyframes marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 @keyframes shimmer{0%{background-position:-200% center}100%{background-position:200% center}}
-@keyframes pulse-ring{0%{transform:scale(.95);opacity:1}70%{transform:scale(1.05);opacity:.7}100%{transform:scale(.95);opacity:1}}
-@keyframes slide-in{from{opacity:0;transform:translateX(-20px)}to{opacity:1;transform:none}}
-.fade{animation:fadeUp .5s cubic-bezier(.22,1,.36,1) both;}
-.sg>*{animation:fadeUp .5s cubic-bezier(.22,1,.36,1) both;}
-.sg>*:nth-child(1){animation-delay:.05s}.sg>*:nth-child(2){animation-delay:.1s}.sg>*:nth-child(3){animation-delay:.15s}
-.sg>*:nth-child(4){animation-delay:.2s}.sg>*:nth-child(5){animation-delay:.25s}.sg>*:nth-child(6){animation-delay:.3s}
-.box-card{transition:transform .3s cubic-bezier(.34,1.56,.64,1),box-shadow .3s;cursor:pointer;}
-.box-card:hover{transform:translateY(-8px) scale(1.01);box-shadow:0 30px 60px rgba(0,0,0,.5),0 0 40px rgba(0,194,255,.15);}
-.prod-card{transition:transform .25s cubic-bezier(.34,1.56,.64,1),box-shadow .25s;}
-.prod-card:hover{transform:translateY(-6px);box-shadow:0 20px 48px rgba(0,0,0,.5);}
-.shimmer{background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,.08) 50%,transparent 100%);background-size:200% 100%;animation:shimmer 2s infinite;}
-@media(max-width:640px){.hm{display:none!important}}
+@keyframes bannerSlide{from{opacity:0;transform:translateY(-100%)}to{opacity:1;transform:none}}
+@keyframes heroTextIn{from{opacity:0;transform:translateY(40px) scale(.96)}to{opacity:1;transform:none}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+@keyframes scaleIn{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:scale(1)}}
+.fade{animation:fadeUp .6s cubic-bezier(.22,1,.36,1) both;}
+.fade-fast{animation:fadeUp .35s cubic-bezier(.22,1,.36,1) both;}
+.sg>*{animation:fadeUp .6s cubic-bezier(.22,1,.36,1) both;}
+.sg>*:nth-child(1){animation-delay:.04s}.sg>*:nth-child(2){animation-delay:.09s}.sg>*:nth-child(3){animation-delay:.14s}
+.sg>*:nth-child(4){animation-delay:.19s}.sg>*:nth-child(5){animation-delay:.24s}.sg>*:nth-child(6){animation-delay:.29s}
+.sg>*:nth-child(7){animation-delay:.34s}.sg>*:nth-child(8){animation-delay:.39s}
+/* BOX CARDS */
+.box-card{transition:transform .35s cubic-bezier(.34,1.56,.64,1),box-shadow .35s;cursor:pointer;position:relative;}
+.box-card:hover{transform:translateY(-10px) scale(1.01);}
+.box-card:hover .box-card-img{transform:scale(1.06);}
+.box-card-img{transition:transform .5s cubic-bezier(.25,.46,.45,.94);}
+/* PRODUCT CARDS */
+.prod-card{transition:transform .3s cubic-bezier(.34,1.56,.64,1),box-shadow .3s;cursor:pointer;background:#fff;border-radius:16px;overflow:hidden;}
+.prod-card:hover{transform:translateY(-8px);box-shadow:0 32px 64px rgba(0,0,0,.4);}
+.prod-card:hover .prod-img{transform:scale(1.08);}
+.prod-img{transition:transform .5s cubic-bezier(.25,.46,.45,.94);width:100%;height:100%;object-fit:cover;}
+/* BADGES */
+.badge-nuevo{background:linear-gradient(135deg,#00C2FF,#0044AA);color:#fff;font-size:9px;font-weight:900;padding:3px 8px;border-radius:20px;letter-spacing:.8px;text-transform:uppercase;}
+.badge-oferta{background:linear-gradient(135deg,#FF1744,#C62828);color:#fff;font-size:9px;font-weight:900;padding:3px 8px;border-radius:20px;letter-spacing:.8px;text-transform:uppercase;}
+/* BUSCADOR */
+.search-input{background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.1);border-radius:30px;padding:11px 20px 11px 44px;font-size:14px;font-family:'Outfit',sans-serif;color:#fff;outline:none;transition:all .2s;width:100%;}
+.search-input:focus{border-color:#00C2FF;background:rgba(0,194,255,.06);box-shadow:0 0 0 3px rgba(0,194,255,.1);}
+.search-input::placeholder{color:rgba(255,255,255,.3);}
+/* SHIMMER SKELETON */
+.skeleton{background:linear-gradient(90deg,rgba(255,255,255,.04) 0%,rgba(255,255,255,.1) 50%,rgba(255,255,255,.04) 100%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:8px;}
+@media(max-width:640px){
+  .hm{display:none!important}
+  .grid-mobile-1{grid-template-columns:1fr!important}
+  .grid-mobile-2{grid-template-columns:1fr 1fr!important}
+}
 `;
 
 // ─── SPINNER ──────────────────────────────────────────────────────────────────
@@ -144,40 +169,53 @@ function BoxAvatar({box,size=54,radius=12}){
 }
 
 // ─── NAV ──────────────────────────────────────────────────────────────────────
-function Nav({view,setView,setActiveBox,cartN,user,onLogout,onLoginClick}){
+function Nav({view,setView,setActiveBox,cartN,user,onLogout,onLoginClick,searchQuery,setSearchQuery}){
   const [scrolled,setScrolled]=useState(false);
-  useEffect(()=>{const h=()=>setScrolled(window.scrollY>20);window.addEventListener("scroll",h);return()=>window.removeEventListener("scroll",h);},[]);
+  const [showSearch,setShowSearch]=useState(false);
+  useEffect(()=>{const h=()=>setScrolled(window.scrollY>30);window.addEventListener("scroll",h);return()=>window.removeEventListener("scroll",h);},[]);
   return(
-    <nav style={{position:"sticky",top:0,zIndex:200,background:scrolled?"rgba(0,11,30,0.95)":"rgba(0,11,30,0.7)",backdropFilter:"blur(20px)",borderBottom:"1px solid rgba(0,194,255,.15)",transition:"background .3s"}}>
-      <div style={{maxWidth:1280,margin:"0 auto",padding:"0 24px",height:64,display:"flex",alignItems:"center",justifyContent:"space-between",gap:12}}>
-        <div style={{display:"flex",alignItems:"center",gap:12,cursor:"pointer"}} onClick={()=>{setView("home");setActiveBox(null);}}>
-          <div style={{width:42,height:42,borderRadius:12,background:"linear-gradient(135deg,#00C2FF,#0044AA)",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 16px rgba(0,194,255,.4)",animation:"glow 3s ease infinite"}}>
-            <span className="bebas" style={{fontSize:10,color:"#fff",lineHeight:1.1,textAlign:"center",letterSpacing:.5}}>BOX<br/>SHOP</span>
+    <nav style={{position:"sticky",top:0,zIndex:200,background:scrolled?"rgba(9,9,15,0.97)":"rgba(9,9,15,0.8)",backdropFilter:"blur(24px)",borderBottom:`1px solid ${scrolled?"rgba(255,255,255,.08)":"rgba(255,255,255,.04)"}`,transition:"all .3s"}}>
+      <div style={{maxWidth:1400,margin:"0 auto",padding:"0 24px",height:68,display:"flex",alignItems:"center",justifyContent:"space-between",gap:16}}>
+        {/* LOGO */}
+        <div style={{display:"flex",alignItems:"center",gap:14,cursor:"pointer",flexShrink:0}} onClick={()=>{setView("home");setActiveBox(null);}}>
+          <div style={{width:44,height:44,borderRadius:14,background:"linear-gradient(135deg,#00C2FF,#0044AA)",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 20px rgba(0,194,255,.35)",animation:"glow 4s ease infinite"}}>
+            <span className="bebas" style={{fontSize:11,color:"#fff",lineHeight:1,textAlign:"center",letterSpacing:.5}}>BOX<br/>SHOP</span>
           </div>
-          <div>
-            <span className="bebas" style={{fontSize:22,color:"#fff",letterSpacing:2,lineHeight:1,display:"block"}}>BOX <span style={{color:C.electric}}>SHOP</span></span>
-            <span style={{fontSize:8,color:C.muted,letterSpacing:3,textTransform:"uppercase",display:"block",marginTop:1}}>PASEO DE COMPRAS</span>
+          <div className="hm">
+            <div className="bebas" style={{fontSize:24,color:"#fff",letterSpacing:2,lineHeight:1}}>BOX <span style={{color:C.electric}}>SHOP</span></div>
+            <div style={{fontSize:8,color:"rgba(255,255,255,.4)",letterSpacing:3,textTransform:"uppercase",marginTop:1}}>PASEO DE COMPRAS · SAN RAFAEL</div>
           </div>
         </div>
-        <div style={{display:"flex",gap:8,alignItems:"center"}}>
-          <a className="ig hm" href={IG} target="_blank" rel="noreferrer" style={{padding:"8px 14px",fontSize:12}}><IgSvg s={13}/>Instagram</a>
-          <button className="btn" onClick={()=>setView("home")} style={{padding:"8px 14px",fontSize:12,background:view==="home"?"rgba(0,194,255,0.15)":"transparent",color:view==="home"?C.electric:C.muted,border:`1.5px solid ${view==="home"?"rgba(0,194,255,0.4)":"rgba(255,255,255,0.1)"}`,display:"flex",alignItems:"center",gap:6}}>🏬 <span className="hm">Box</span></button>
-          <button className="btn" onClick={()=>setView("cart")} style={{padding:"8px 14px",fontSize:12,background:view==="cart"?"rgba(0,194,255,0.15)":"transparent",color:view==="cart"?C.electric:C.muted,border:`1.5px solid ${view==="cart"?"rgba(0,194,255,0.4)":"rgba(255,255,255,0.1)"}`,position:"relative",display:"flex",alignItems:"center",gap:6}}>
-            🛒 <span className="hm">Carrito</span>
-            {cartN>0&&<span style={{position:"absolute",top:-6,right:-6,background:`linear-gradient(135deg,${C.gold},${C.goldDark})`,color:"#000",borderRadius:"50%",width:18,height:18,fontSize:10,fontWeight:900,display:"flex",alignItems:"center",justifyContent:"center"}}>{cartN}</span>}
+        {/* BUSCADOR */}
+        <div style={{flex:1,maxWidth:400,position:"relative",display:"flex",alignItems:"center"}} className="hm">
+          <svg style={{position:"absolute",left:14,zIndex:1,color:"rgba(255,255,255,.3)"}} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input className="search-input" placeholder="Buscar productos en todos los box..." value={searchQuery} onChange={e=>setSearchQuery(e.target.value)} style={{fontSize:13}}/>
+        </div>
+        {/* ACCIONES */}
+        <div style={{display:"flex",gap:6,alignItems:"center",flexShrink:0}}>
+          <a className="ig hm" href={IG} target="_blank" rel="noreferrer" style={{padding:"8px 16px",fontSize:12,borderRadius:30}}><IgSvg s={13}/><span style={{marginLeft:6}}>Instagram</span></a>
+          <button className="btn" onClick={()=>setView("home")} style={{padding:"9px 16px",fontSize:12,background:view==="home"?"rgba(0,194,255,.15)":"transparent",color:view==="home"?C.electric:"rgba(255,255,255,.6)",border:`1.5px solid ${view==="home"?"rgba(0,194,255,.3)":"rgba(255,255,255,.08)"}`,borderRadius:30,display:"flex",alignItems:"center",gap:6}}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+            <span className="hm">Inicio</span>
+          </button>
+          <button className="btn" onClick={()=>setView("cart")} style={{padding:"9px 16px",fontSize:12,background:view==="cart"?"rgba(0,194,255,.15)":"transparent",color:view==="cart"?C.electric:"rgba(255,255,255,.6)",border:`1.5px solid ${view==="cart"?"rgba(0,194,255,.3)":"rgba(255,255,255,.08)"}`,borderRadius:30,position:"relative",display:"flex",alignItems:"center",gap:6}}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+            <span className="hm">Carrito</span>
+            {cartN>0&&<span style={{position:"absolute",top:-5,right:-5,background:"linear-gradient(135deg,#FF1744,#C62828)",color:"#fff",borderRadius:"50%",minWidth:18,height:18,fontSize:10,fontWeight:900,display:"flex",alignItems:"center",justifyContent:"center",padding:"0 4px",boxShadow:"0 2px 8px rgba(255,23,68,.5)"}}>{cartN}</span>}
           </button>
           {!user
-            ?<button className="btn" onClick={onLoginClick} style={{padding:"8px 16px",fontSize:12,background:"linear-gradient(135deg,rgba(0,194,255,0.2),rgba(0,68,170,0.2))",color:C.electric,border:"1.5px solid rgba(0,194,255,0.3)",display:"flex",alignItems:"center",gap:6}}>🔑 <span className="hm">Acceso</span></button>
-            :<div style={{display:"flex",alignItems:"center",gap:8,background:"rgba(0,194,255,0.08)",border:"1.5px solid rgba(0,194,255,0.2)",borderRadius:12,padding:"6px 12px"}}>
-              <BoxAvatar box={user.is_admin?{emoji:"🛡️",cat:""}:user} size={28} radius={8}/>
-              <span className="hm" style={{fontSize:12,fontWeight:700,maxWidth:100,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",color:C.light}}>{user.is_admin?"Admin":user.business_name}</span>
+            ?<button className="btn" onClick={onLoginClick} style={{padding:"9px 18px",fontSize:12,background:"linear-gradient(135deg,#00C2FF,#0044AA)",color:"#fff",borderRadius:30,display:"flex",alignItems:"center",gap:6,boxShadow:"0 4px 16px rgba(0,194,255,.3)"}}>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
+                <span className="hm">Acceso</span>
+              </button>
+            :<div style={{display:"flex",alignItems:"center",gap:8,background:"rgba(255,255,255,.06)",border:"1px solid rgba(255,255,255,.1)",borderRadius:30,padding:"6px 14px 6px 8px"}}>
+              <BoxAvatar box={user.is_admin?{emoji:"🛡️",cat:""}:user} size={30} radius={30}/>
+              <span className="hm" style={{fontSize:12,fontWeight:700,maxWidth:100,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",color:"rgba(255,255,255,.85)"}}>{user.is_admin?"Admin":user.business_name}</span>
               {user.is_admin
-                ?<button className="btn" onClick={()=>setView("admin")} style={{background:"linear-gradient(135deg,#6D28D9,#4C1D95)",color:"#fff",padding:"4px 10px",fontSize:11}}>Panel</button>
-                :<button className="btn" onClick={()=>setView("box-panel")} style={{background:"linear-gradient(135deg,#00C2FF,#0044AA)",color:"#fff",padding:"4px 10px",fontSize:11}}>Mi Box</button>
-              }
-              <button className="btn" onClick={onLogout} style={{background:"transparent",color:C.muted,padding:"3px 8px",fontSize:11,border:"1px solid rgba(255,255,255,.1)"}}>✕</button>
-            </div>
-          }
+                ?<button className="btn" onClick={()=>setView("admin")} style={{background:"linear-gradient(135deg,#6D28D9,#4C1D95)",color:"#fff",padding:"4px 12px",fontSize:11,borderRadius:20}}>Panel</button>
+                :<button className="btn" onClick={()=>setView("box-panel")} style={{background:"linear-gradient(135deg,#00C2FF,#0044AA)",color:"#fff",padding:"4px 12px",fontSize:11,borderRadius:20}}>Mi Box</button>}
+              <button className="btn" onClick={onLogout} style={{background:"rgba(255,23,68,.15)",color:C.danger,padding:"4px 8px",fontSize:11,borderRadius:16,border:"1px solid rgba(255,23,68,.2)"}}>✕</button>
+            </div>}
         </div>
       </div>
     </nav>
@@ -220,188 +258,328 @@ function LoginModal({onClose,onLogin,setToast}){
 }
 
 // ─── HOME ─────────────────────────────────────────────────────────────────────
-function Home({boxes,shopConfig,setView,setActiveBox,loading}){
+function Home({boxes,shopConfig,setView,setActiveBox,loading,searchQuery,setSearchQuery}){
   const [cat,setCat]=useState("Todos");
+  const [bannerIdx,setBannerIdx]=useState(0);
+  const [bannerAnim,setBannerAnim]=useState(true);
+  const activeBanners=(shopConfig?.banners||[]).filter(b=>b.active);
   const cats=["Todos",...[...new Set(boxes.filter(b=>b.active&&b.cat).map(b=>b.cat))]];
-  // Also merge with admin-defined categories for consistent display
   const visible=boxes.filter(b=>b.active).filter(b=>cat==="Todos"||b.cat===cat);
   const available=boxes.filter(b=>!b.active);
-  const activeBanners=(shopConfig?.banners||[]).filter(b=>b.active);
-  const [bannerIdx,setBannerIdx]=useState(0);
-  useEffect(()=>{if(activeBanners.length<=1)return;const t=setInterval(()=>setBannerIdx(i=>(i+1)%activeBanners.length),4000);return()=>clearInterval(t);},[activeBanners.length]);
+
+  // Banner auto-rotate
+  useEffect(()=>{
+    if(activeBanners.length<=1) return;
+    const t=setInterval(()=>{
+      setBannerAnim(false);
+      setTimeout(()=>{setBannerIdx(i=>(i+1)%activeBanners.length);setBannerAnim(true);},200);
+    },5000);
+    return()=>clearInterval(t);
+  },[activeBanners.length]);
 
   return(
     <div>
+      {/* ── BANNER ANIMADO ── */}
       {activeBanners.length>0&&(
-        <div style={{background:activeBanners[bannerIdx]?.color||"linear-gradient(135deg,#FFD200,#FF6F00)",transition:"background .8s cubic-bezier(.4,0,.2,1)",padding:"0",textAlign:"center",boxShadow:"0 4px 24px rgba(0,0,0,.4)",position:"relative",overflow:"hidden",minHeight:44}}>
-          {/* Efecto de brillo animado */}
-          <div style={{position:"absolute",inset:0,background:"linear-gradient(90deg,transparent 0%,rgba(255,255,255,.15) 50%,transparent 100%)",animation:"shimmer 3s infinite",pointerEvents:"none"}}/>
+        <div style={{background:activeBanners[bannerIdx]?.color||"linear-gradient(135deg,#FFD200,#FF6F00)",minHeight:48,position:"relative",overflow:"hidden",cursor:"pointer"}}>
+          {/* Efecto brillo */}
+          <div style={{position:"absolute",inset:0,background:"linear-gradient(90deg,transparent,rgba(255,255,255,.2),transparent)",backgroundSize:"200% 100%",animation:"shimmer 3s infinite",pointerEvents:"none"}}/>
           {/* Líneas decorativas */}
-          <div style={{position:"absolute",inset:0,background:"repeating-linear-gradient(90deg,transparent,transparent 60px,rgba(255,255,255,.05) 60px,rgba(255,255,255,.05) 61px)",pointerEvents:"none"}}/>
-          {/* Texto animado tipo marquee */}
-          <div style={{padding:"10px 24px",display:"flex",alignItems:"center",justifyContent:"center",gap:12,position:"relative"}}>
-            <span style={{fontSize:18,animation:"float 2s ease infinite"}}>✨</span>
-            <span style={{fontSize:13,fontWeight:800,color:"#fff",letterSpacing:.5,textShadow:"0 1px 4px rgba(0,0,0,.3)"}}>{activeBanners[bannerIdx]?.text}</span>
-            <span style={{fontSize:18,animation:"float 2s ease infinite .5s"}}>✨</span>
+          <div style={{position:"absolute",inset:0,backgroundImage:"repeating-linear-gradient(90deg,rgba(255,255,255,0) 0px,rgba(255,255,255,0) 80px,rgba(255,255,255,.06) 80px,rgba(255,255,255,.06) 81px)",pointerEvents:"none"}}/>
+          <div style={{maxWidth:1400,margin:"0 auto",padding:"0 24px",height:48,display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,position:"relative"}}>
+            <div style={{display:"flex",alignItems:"center",gap:10,transition:"opacity .2s",opacity:bannerAnim?1:0}}>
+              <span style={{fontSize:16,animation:"float 2s ease infinite"}}>✨</span>
+              <span style={{fontSize:13,fontWeight:800,color:"#fff",letterSpacing:.3,textShadow:"0 1px 4px rgba(0,0,0,.3)"}}>{activeBanners[bannerIdx]?.text}</span>
+              <span style={{fontSize:16,animation:"float 2s ease infinite .4s"}}>✨</span>
+            </div>
+            {activeBanners.length>1&&(
+              <div style={{display:"flex",gap:5}}>
+                {activeBanners.map((_,i)=>(
+                  <div key={i} onClick={()=>{setBannerIdx(i);setBannerAnim(true);}}
+                    style={{width:i===bannerIdx?20:6,height:6,borderRadius:3,background:i===bannerIdx?"rgba(255,255,255,.9)":"rgba(255,255,255,.35)",transition:"all .4s cubic-bezier(.34,1.56,.64,1)",cursor:"pointer"}}/>
+                ))}
+              </div>
+            )}
           </div>
-          {activeBanners.length>1&&<div style={{display:"flex",gap:6,justifyContent:"center",paddingBottom:8}}>{activeBanners.map((_,i)=><div key={i} onClick={()=>setBannerIdx(i)} style={{width:i===bannerIdx?24:7,height:7,borderRadius:4,background:i===bannerIdx?"rgba(255,255,255,.95)":"rgba(255,255,255,.35)",transition:"all .4s cubic-bezier(.34,1.56,.64,1)",cursor:"pointer",boxShadow:i===bannerIdx?"0 2px 8px rgba(0,0,0,.3)":"none"}}/>)}</div>}
         </div>
       )}
-      {/* HERO CON FOTO REAL */}
-      <div style={{position:"relative",height:"clamp(420px,58vw,620px)",overflow:"hidden"}}>
-        {/* Foto real del frente */}
-        <img src={HERO_IMG} alt="Box Shop San Rafael" style={{position:"absolute",inset:0,width:"100%",height:"100%",objectFit:"cover",objectPosition:"center top",filter:"brightness(.55)"}}/>
-        {/* Gradiente overlay */}
-        <div style={{position:"absolute",inset:0,background:"linear-gradient(to bottom,rgba(0,11,30,.3) 0%,rgba(0,11,30,.1) 40%,rgba(0,11,30,.85) 100%)"}}/>
-        {/* Efecto de brillo azul */}
-        <div style={{position:"absolute",inset:0,background:"radial-gradient(circle at 50% 30%,rgba(0,194,255,.12),transparent 60%)",pointerEvents:"none"}}/>
-        {/* Contenido */}
-        <div style={{position:"absolute",inset:0,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"flex-end",padding:"0 24px 52px",textAlign:"center"}}>
-          {/* Logo recreado */}
-          <div style={{marginBottom:20,animation:"float 4s ease infinite"}}>
-            <div style={{background:"rgba(255,255,255,.95)",borderRadius:18,padding:"14px 32px",boxShadow:"0 0 80px rgba(0,194,255,.6),0 24px 48px rgba(0,0,0,.5)",border:"3px solid #0044AA",position:"relative",display:"inline-block"}}>
-              <div style={{position:"absolute",top:-8,left:"50%",transform:"translateX(-50%)",width:"55%",height:8,background:"#0044AA",borderRadius:"4px 4px 0 0"}}/>
-              <div className="bebas" style={{fontSize:"clamp(40px,8vw,80px)",color:"#001B4E",lineHeight:.88,letterSpacing:3}}>BOX<br/>SHOP</div>
-              <div style={{fontSize:"clamp(7px,1.1vw,10px)",color:"#0044AA",fontWeight:900,letterSpacing:5,textTransform:"uppercase",textAlign:"center",marginTop:6}}>PASEO DE COMPRAS</div>
+
+      {/* ── HERO CON FOTO REAL ── */}
+      <div style={{position:"relative",height:"clamp(480px,60vw,680px)",overflow:"hidden"}}>
+        <img src={HERO_IMG} alt="Box Shop San Rafael" style={{position:"absolute",inset:0,width:"100%",height:"100%",objectFit:"cover",objectPosition:"center 20%",filter:"brightness(.45) saturate(1.2)"}}/>
+        {/* Gradientes overlay */}
+        <div style={{position:"absolute",inset:0,background:"linear-gradient(to bottom,rgba(9,9,15,.2) 0%,rgba(9,9,15,.05) 35%,rgba(9,9,15,.7) 75%,rgba(9,9,15,1) 100%)"}}/>
+        <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 50% 60%,rgba(0,194,255,.08),transparent 70%)"}}/>
+        {/* Contenido hero */}
+        <div style={{position:"absolute",inset:0,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"flex-end",padding:"0 24px 60px",textAlign:"center"}}>
+          {/* Logo */}
+          <div style={{marginBottom:24,animation:"float 5s ease infinite"}}>
+            <div style={{background:"rgba(255,255,255,.97)",borderRadius:20,padding:"16px 36px",boxShadow:"0 0 80px rgba(0,194,255,.5),0 32px 64px rgba(0,0,0,.6)",border:"3px solid #0044AA",display:"inline-block",position:"relative"}}>
+              <div style={{position:"absolute",top:-10,left:"50%",transform:"translateX(-50%)",width:"50%",height:10,background:"linear-gradient(135deg,#0044AA,#00C2FF)",borderRadius:"4px 4px 0 0"}}/>
+              <div className="bebas" style={{fontSize:"clamp(48px,9vw,90px)",color:"#001B4E",lineHeight:.88,letterSpacing:3}}>BOX<br/>SHOP</div>
+              <div style={{fontSize:"clamp(8px,1.2vw,11px)",color:"#0044AA",fontWeight:900,letterSpacing:5,textTransform:"uppercase",textAlign:"center",marginTop:8}}>PASEO DE COMPRAS</div>
             </div>
           </div>
-          <p style={{color:"rgba(255,255,255,.9)",fontSize:"clamp(14px,2vw,20px)",fontWeight:600,marginBottom:28,textShadow:"0 2px 16px rgba(0,0,0,.8)",letterSpacing:.5}}>Todo lo que necesitás en un solo lugar · San Rafael, Mendoza</p>
-          <div style={{display:"flex",gap:10,justifyContent:"center",flexWrap:"wrap"}}>
-            <a href={MAP} target="_blank" rel="noreferrer" style={{background:"rgba(0,0,0,.4)",backdropFilter:"blur(16px)",border:"1.5px solid rgba(255,255,255,.3)",color:"#fff",padding:"10px 20px",borderRadius:30,fontSize:13,fontWeight:700,textDecoration:"none",display:"flex",alignItems:"center",gap:8,transition:"all .2s",boxShadow:"0 4px 16px rgba(0,0,0,.3)"}}>📍 Av. Rivadavia 135 · San Rafael</a>
-            <a className="ig" href={IG} target="_blank" rel="noreferrer" style={{padding:"10px 20px",fontSize:13,borderRadius:30,boxShadow:"0 4px 16px rgba(0,0,0,.3)"}}><IgSvg s={14}/> @boxshop.sanrafael</a>
+          {/* Tagline */}
+          <h1 style={{color:"rgba(255,255,255,.92)",fontSize:"clamp(16px,2.5vw,22px)",fontWeight:300,marginBottom:8,letterSpacing:2,textTransform:"uppercase",animation:"heroTextIn .8s .2s both"}}>
+            Todo lo que necesitás en un solo lugar
+          </h1>
+          <p style={{color:"rgba(255,255,255,.55)",fontSize:"clamp(12px,1.5vw,15px)",marginBottom:32,letterSpacing:1,animation:"heroTextIn .8s .35s both"}}>
+            Av. Rivadavia 135 · San Rafael, Mendoza
+          </p>
+          {/* Botones */}
+          <div style={{display:"flex",gap:12,justifyContent:"center",flexWrap:"wrap",animation:"heroTextIn .8s .5s both"}}>
+            <button className="btn" onClick={()=>document.getElementById("boxes-section")?.scrollIntoView({behavior:"smooth"})}
+              style={{background:"linear-gradient(135deg,#00C2FF,#0044AA)",color:"#fff",padding:"14px 32px",fontSize:14,fontWeight:700,borderRadius:30,boxShadow:"0 8px 32px rgba(0,194,255,.4)",letterSpacing:.5}}>
+              Explorar box →
+            </button>
+            <a className="ig" href={IG} target="_blank" rel="noreferrer" style={{padding:"14px 24px",fontSize:14,borderRadius:30,boxShadow:"0 8px 24px rgba(220,39,67,.3)"}}>
+              <IgSvg s={15}/> @boxshop.sanrafael
+            </a>
           </div>
         </div>
-        {/* Ola decorativa abajo */}
-        <svg style={{position:"absolute",bottom:-1,left:0,width:"100%"}} viewBox="0 0 1440 60" preserveAspectRatio="none"><path d="M0,40 C360,80 1080,0 1440,40 L1440,60 L0,60 Z" fill="#000B1E"/></svg>
+        {/* Ola decorativa */}
+        <svg style={{position:"absolute",bottom:-1,left:0,width:"100%",height:60}} viewBox="0 0 1440 60" preserveAspectRatio="none">
+          <path d="M0,30 C240,60 480,0 720,30 C960,60 1200,0 1440,30 L1440,60 L0,60 Z" fill="#09090f"/>
+        </svg>
       </div>
 
-      {/* STATS */}
-      <div style={{background:"linear-gradient(135deg,#001B4E,#000B1E)",borderBottom:"1px solid rgba(0,194,255,.15)"}}>
-        <div style={{maxWidth:1280,margin:"0 auto",padding:"14px 24px",display:"flex",gap:32,justifyContent:"center",flexWrap:"wrap"}}>
-          {[[boxes.filter(b=>b.active).length+"","Box activos","⚡"],[boxes.filter(b=>b.delivery&&b.active).length+"","Con envío","🚚"],["31","Box totales","🏬"]].map(([n,l,ic])=>(
-            <div key={l} style={{textAlign:"center",display:"flex",alignItems:"center",gap:10}}><span style={{fontSize:22}}>{ic}</span><div><div className="bebas" style={{fontSize:26,color:C.electric,lineHeight:1}}>{n}</div><div style={{fontSize:10,color:C.muted,letterSpacing:1,textTransform:"uppercase"}}>{l}</div></div></div>
+      {/* ── STATS BAR ── */}
+      <div style={{background:"linear-gradient(135deg,rgba(0,194,255,.08),rgba(0,68,170,.08))",borderBottom:"1px solid rgba(0,194,255,.1)"}}>
+        <div style={{maxWidth:1400,margin:"0 auto",padding:"16px 24px",display:"flex",gap:0,justifyContent:"center",flexWrap:"wrap"}}>
+          {[
+            [boxes.filter(b=>b.active).length+"","Box activos","M13 10V3L4 14h7v7l9-11h-7z"],
+            [boxes.filter(b=>b.delivery&&b.active).length+"","Con envío","M1 3h15v13H1zM16 8h4l3 3v5h-7V8z"],
+            ["31","Box totales","M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"],
+          ].map(([n,l,icon])=>(
+            <div key={l} style={{textAlign:"center",display:"flex",alignItems:"center",gap:12,padding:"8px 32px",borderRight:"1px solid rgba(255,255,255,.06)"}}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00C2FF" strokeWidth="1.5"><path d={icon}/></svg>
+              <div>
+                <div className="bebas" style={{fontSize:28,color:C.electric,lineHeight:1,letterSpacing:1}}>{n}</div>
+                <div style={{fontSize:10,color:"rgba(255,255,255,.4)",letterSpacing:1.5,textTransform:"uppercase",marginTop:1}}>{l}</div>
+              </div>
+            </div>
           ))}
         </div>
       </div>
 
-      {/* HORARIOS + MAPA */}
-      <div style={{maxWidth:1280,margin:"0 auto",padding:"28px 24px 0",display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(280px,1fr))",gap:16}}>
-        <div style={{background:"rgba(255,255,255,.04)",border:"1px solid rgba(0,194,255,.15)",borderRadius:18,padding:"22px 24px"}}>
-          <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:16}}>
-            <span style={{fontSize:26}}>🕐</span>
-            <div><p style={{fontWeight:800,fontSize:15}}>Horarios del Shopping</p><p style={{color:C.muted,fontSize:11}}>Av. Rivadavia 135, San Rafael</p></div>
+      {/* ── BUSCADOR MOBILE ── */}
+      <div style={{maxWidth:1400,margin:"0 auto",padding:"24px 24px 0"}} className="grid-mobile-1">
+        <div style={{position:"relative",display:"flex",alignItems:"center",maxWidth:500}}>
+          <svg style={{position:"absolute",left:14,color:"rgba(255,255,255,.3)",zIndex:1}} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input className="search-input" placeholder="Buscar productos..." value={searchQuery} onChange={e=>setSearchQuery(e.target.value)}/>
+          {searchQuery&&<button className="btn" onClick={()=>setSearchQuery("")} style={{position:"absolute",right:12,background:"transparent",color:"rgba(255,255,255,.4)",padding:"4px 8px",fontSize:12}}>✕</button>}
+        </div>
+      </div>
+
+      {/* ── HORARIOS + MAPA ── */}
+      <div style={{maxWidth:1400,margin:"0 auto",padding:"28px 24px 0",display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(280px,1fr))",gap:16}}>
+        <div style={{background:"rgba(255,255,255,.03)",border:"1px solid rgba(255,255,255,.07)",borderRadius:20,padding:"22px 24px"}}>
+          <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:18}}>
+            <div style={{width:40,height:40,borderRadius:12,background:"rgba(0,194,255,.1)",display:"flex",alignItems:"center",justifyContent:"center",border:"1px solid rgba(0,194,255,.2)"}}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00C2FF" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+            <div>
+              <p style={{fontWeight:800,fontSize:15,color:"#fff"}}>Horarios del Shopping</p>
+              <p style={{color:"rgba(255,255,255,.4)",fontSize:11}}>Av. Rivadavia 135, San Rafael</p>
+            </div>
           </div>
           {(shopConfig?.hours||[]).map((h,i)=>(
-            <div key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"9px 0",borderBottom:i<(shopConfig.hours.length-1)?"1px solid rgba(255,255,255,.06)":"none"}}>
-              <span style={{color:C.muted,fontSize:13}}>{h.day}</span>
+            <div key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 0",borderBottom:i<(shopConfig.hours.length-1)?"1px solid rgba(255,255,255,.04)":"none"}}>
+              <span style={{color:"rgba(255,255,255,.5)",fontSize:13}}>{h.day}</span>
               <span style={{fontWeight:700,fontSize:13,color:C.electric}}>{h.time}</span>
             </div>
           ))}
         </div>
-        <div style={{background:"rgba(255,255,255,.04)",border:"1px solid rgba(0,194,255,.15)",borderRadius:18,overflow:"hidden",minHeight:200,position:"relative"}}>
-          <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3317.5!2d-68.3332!3d-34.6178!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2sAv.+Rivadavia+135%2C+San+Rafael%2C+Mendoza!5e0!3m2!1ses!2sar!4v1" width="100%" height="100%" style={{border:0,display:"block",minHeight:200,filter:"invert(90%) hue-rotate(180deg)"}} allowFullScreen loading="lazy" referrerPolicy="no-referrer-when-downgrade" title="Ubicación Box Shop"/>
-          <a href={MAP} target="_blank" rel="noreferrer" style={{position:"absolute",bottom:12,right:12,background:"linear-gradient(135deg,#00C2FF,#0044AA)",color:"#fff",padding:"8px 14px",borderRadius:10,fontSize:12,fontWeight:700,textDecoration:"none",boxShadow:"0 4px 16px rgba(0,0,0,.4)"}}>📍 Abrir en Maps</a>
+        <div style={{background:"rgba(255,255,255,.03)",border:"1px solid rgba(255,255,255,.07)",borderRadius:20,overflow:"hidden",minHeight:220,position:"relative"}}>
+          <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3317.5!2d-68.3332!3d-34.6178!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2sAv.+Rivadavia+135%2C+San+Rafael%2C+Mendoza!5e0!3m2!1ses!2sar!4v1" width="100%" height="100%" style={{border:0,display:"block",minHeight:220,filter:"invert(90%) hue-rotate(180deg) saturate(.7)"}} allowFullScreen loading="lazy" title="Ubicación Box Shop"/>
+          <a href={MAP} target="_blank" rel="noreferrer" style={{position:"absolute",bottom:12,right:12,background:"linear-gradient(135deg,#00C2FF,#0044AA)",color:"#fff",padding:"9px 18px",borderRadius:30,fontSize:12,fontWeight:700,textDecoration:"none",boxShadow:"0 4px 16px rgba(0,0,0,.5)",display:"flex",alignItems:"center",gap:6}}>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            Ver en Maps
+          </a>
         </div>
       </div>
 
-      {/* GRID */}
-      <div style={{maxWidth:1280,margin:"0 auto",padding:"36px 24px 64px"}}>
+      {/* ── GRID DE BOXES ── */}
+      <div id="boxes-section" style={{maxWidth:1400,margin:"0 auto",padding:"36px 24px 80px"}}>
+        {/* Filtros */}
         <div style={{display:"flex",gap:8,marginBottom:32,flexWrap:"wrap",alignItems:"center"}}>
-          <span className="bebas" style={{fontSize:18,color:C.muted,letterSpacing:2,marginRight:4}}>FILTRAR:</span>
-          {cats.map(c=>{const active=cat===c;const [c1,c2]=c==="Todos"?[C.electric,C.deep]:catGrad(c);return(
-            <button key={c} className="btn" onClick={()=>setCat(c)}
-              style={{padding:"8px 20px",fontSize:12,fontWeight:700,
-                background:active?`linear-gradient(135deg,${c1},${c2})`:"rgba(255,255,255,.05)",
-                color:active?"#fff":C.muted,
-                border:`1.5px solid ${active?"transparent":"rgba(255,255,255,.08)"}`,
-                boxShadow:active?`0 4px 20px ${c1}55`:"none",
-                borderRadius:30,letterSpacing:.3,
-                transition:"all .25s cubic-bezier(.34,1.56,.64,1)"}}>
-              {c}
-            </button>
-          );})}
+          <span style={{fontSize:11,fontWeight:700,color:"rgba(255,255,255,.3)",letterSpacing:2,textTransform:"uppercase",marginRight:4}}>FILTRAR:</span>
+          {cats.map(c=>{
+            const active=cat===c;
+            const [c1,c2]=c==="Todos"?[C.electric,C.deep]:catGrad(c);
+            const count=c==="Todos"?boxes.filter(b=>b.active).length:boxes.filter(b=>b.active&&b.cat===c).length;
+            return(
+              <button key={c} className="btn" onClick={()=>setCat(c)}
+                style={{padding:"9px 20px",fontSize:12,fontWeight:700,
+                  background:active?`linear-gradient(135deg,${c1},${c2})`:"rgba(255,255,255,.05)",
+                  color:active?"#fff":"rgba(255,255,255,.6)",
+                  border:`1px solid ${active?"transparent":"rgba(255,255,255,.08)"}`,
+                  borderRadius:30,
+                  boxShadow:active?`0 4px 20px ${c1}44`:"none",
+                  display:"flex",alignItems:"center",gap:6}}>
+                {c}
+                <span style={{fontSize:10,background:active?"rgba(255,255,255,.2)":"rgba(255,255,255,.1)",borderRadius:20,padding:"1px 7px",fontWeight:900}}>{count}</span>
+              </button>
+            );
+          })}
         </div>
-        {loading?<Spinner label="Cargando boxes..."/>
+
+        {loading?<div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))",gap:20}}>
+          {[1,2,3,4].map(i=><div key={i} style={{borderRadius:20,overflow:"hidden",height:300}}><div className="skeleton" style={{height:"100%"}}/></div>)}
+        </div>
         :<div className="sg" style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))",gap:20}}>
-          {visible.map(box=>{const [c1,c2]=catGrad(box.cat);return(
-            <div key={box.id} className="box-card" onClick={()=>{setActiveBox(box.id);setView("catalog");}}
-              style={{background:"#fff",borderRadius:20,overflow:"hidden",position:"relative",boxShadow:"0 4px 20px rgba(0,0,0,.2)"}}>
-              {/* Header con foto/logo */}
-              <div style={{height:140,background:`linear-gradient(135deg,${c1},${c2})`,position:"relative",display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden"}}>
-                <div style={{position:"absolute",inset:0,background:`radial-gradient(circle at 30% 50%,rgba(255,255,255,.15),transparent 60%)`}}/>
-                {box.logo_url
-                  ?<img src={box.logo_url} alt={box.business_name} style={{width:"100%",height:"100%",objectFit:"cover",position:"absolute",inset:0}}/>
-                  :<span style={{fontSize:64,filter:"drop-shadow(0 4px 16px rgba(0,0,0,.3))",animation:"float 4s ease infinite",position:"relative"}}>{box.emoji}</span>}
-                {/* Badge número */}
-                <div style={{position:"absolute",top:12,left:12,background:"rgba(0,0,0,.4)",backdropFilter:"blur(8px)",borderRadius:20,padding:"4px 12px",fontSize:11,fontWeight:900,color:"#fff",border:"1px solid rgba(255,255,255,.2)"}}>{boxLabel(box.box_numbers)}</div>
-                {/* Badge categoría */}
-                {box.cat&&<div style={{position:"absolute",top:12,right:12,background:"rgba(255,255,255,.2)",backdropFilter:"blur(8px)",borderRadius:20,padding:"4px 12px",fontSize:10,fontWeight:800,color:"#fff",letterSpacing:.8,textTransform:"uppercase",border:"1px solid rgba(255,255,255,.25)"}}>{box.cat}</div>}
-                {/* WhatsApp flotante */}
-                {box.whatsapp&&<a href={"https://wa.me/549"+box.whatsapp.replace(/\D/g,"")} target="_blank" rel="noreferrer" onClick={e=>e.stopPropagation()}
-                  style={{position:"absolute",bottom:12,right:12,background:"#25D366",borderRadius:"50%",width:36,height:36,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,textDecoration:"none",boxShadow:"0 4px 12px rgba(37,211,102,.5)",transition:"transform .2s",zIndex:2}}
-                  onMouseEnter={e=>e.currentTarget.style.transform="scale(1.2)"} onMouseLeave={e=>e.currentTarget.style.transform="scale(1)"}>💬</a>}
-              </div>
-              {/* Contenido */}
-              <div style={{padding:"16px 18px 18px"}}>
-                <h3 style={{fontSize:16,fontWeight:900,marginBottom:4,color:"#1a1a2e",lineHeight:1.2}}>{box.business_name}</h3>
-                {box.hours&&<p style={{color:"#888",fontSize:11,fontWeight:600,marginBottom:6,display:"flex",alignItems:"center",gap:4}}>🕐 {box.hours}</p>}
-                <p style={{color:"#aaa",fontSize:12,lineHeight:1.5,marginBottom:14}}>{box.description}</p>
-                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                  {box.delivery
-                    ?<span style={{fontSize:11,fontWeight:700,color:"#00A152",background:"rgba(0,200,80,.1)",padding:"5px 12px",borderRadius:20,border:"1px solid rgba(0,200,80,.2)"}}>{box.delivery_cost===0?"🚚 Envío gratis":`🚚 Envío ${fmt(box.delivery_cost)}`}</span>
-                    :<span style={{fontSize:11,fontWeight:600,color:"#999",background:"#f5f5f5",padding:"5px 12px",borderRadius:20}}>📦 Solo retiro</span>}
-                  <span style={{fontSize:12,fontWeight:800,color:c1,display:"flex",alignItems:"center",gap:4}}>Ver box →</span>
+          {visible.map(box=>{
+            const [c1,c2]=catGrad(box.cat);
+            return(
+              <div key={box.id} className="box-card" onClick={()=>{setActiveBox(box.id);setView("catalog");}}
+                style={{background:"rgba(255,255,255,.03)",border:"1px solid rgba(255,255,255,.06)",borderRadius:20,overflow:"hidden"}}>
+                {/* IMAGEN/LOGO */}
+                <div style={{height:160,background:`linear-gradient(135deg,${c1}44,${c2}66)`,position:"relative",overflow:"hidden",display:"flex",alignItems:"center",justifyContent:"center"}}>
+                  <div style={{position:"absolute",inset:0,background:`radial-gradient(circle at 30% 50%,${c1}33,transparent 65%)`}}/>
+                  {box.logo_url
+                    ?<img src={box.logo_url} className="box-card-img" alt={box.business_name} style={{width:"100%",height:"100%",objectFit:"cover",position:"absolute",inset:0}}/>
+                    :<span style={{fontSize:68,position:"relative",filter:"drop-shadow(0 4px 16px rgba(0,0,0,.4))",animation:"float 5s ease infinite"}}>{box.emoji}</span>}
+                  {/* Badges */}
+                  <div style={{position:"absolute",top:12,left:12,background:"rgba(0,0,0,.5)",backdropFilter:"blur(8px)",borderRadius:20,padding:"4px 12px",fontSize:11,fontWeight:800,color:"#fff",border:"1px solid rgba(255,255,255,.15)"}}>{boxLabel(box.box_numbers)}</div>
+                  {box.cat&&<div style={{position:"absolute",top:12,right:12,background:`linear-gradient(135deg,${c1},${c2})`,borderRadius:20,padding:"4px 12px",fontSize:10,fontWeight:800,color:"#fff",letterSpacing:.5,textTransform:"uppercase"}}>{box.cat}</div>}
+                  {/* WhatsApp */}
+                  {box.whatsapp&&<a href={"https://wa.me/549"+box.whatsapp.replace(/\D/g,"")} target="_blank" rel="noreferrer" onClick={e=>e.stopPropagation()}
+                    style={{position:"absolute",bottom:12,right:12,background:"#25D366",borderRadius:"50%",width:38,height:38,display:"flex",alignItems:"center",justifyContent:"center",textDecoration:"none",boxShadow:"0 4px 16px rgba(37,211,102,.5)",transition:"transform .2s",zIndex:2,fontSize:18}}
+                    onMouseEnter={e=>e.currentTarget.style.transform="scale(1.2)"} onMouseLeave={e=>e.currentTarget.style.transform="scale(1)"}>💬</a>}
                 </div>
+                {/* CONTENIDO */}
+                <div style={{padding:"18px 20px 20px"}}>
+                  <h3 style={{fontSize:17,fontWeight:900,marginBottom:5,color:"#fff",lineHeight:1.2}}>{box.business_name}</h3>
+                  {box.hours&&<div style={{display:"flex",alignItems:"center",gap:6,color:"rgba(255,255,255,.4)",fontSize:11,fontWeight:600,marginBottom:8}}>
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    {box.hours}
+                  </div>}
+                  <p style={{color:"rgba(255,255,255,.35)",fontSize:12,lineHeight:1.6,marginBottom:16}}>{box.description}</p>
+                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                    {box.delivery
+                      ?<div style={{display:"flex",alignItems:"center",gap:5,fontSize:11,fontWeight:700,color:"#00E676",background:"rgba(0,230,118,.1)",padding:"5px 12px",borderRadius:20,border:"1px solid rgba(0,230,118,.15)"}}>
+                          <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M1 3h15v13H1zM16 8h4l3 3v5h-7V8z"/></svg>
+                          {box.delivery_cost===0?"Envío gratis":`Envío ${fmt(box.delivery_cost)}`}
+                        </div>
+                      :<div style={{display:"flex",alignItems:"center",gap:5,fontSize:11,fontWeight:600,color:"rgba(255,255,255,.3)",background:"rgba(255,255,255,.04)",padding:"5px 12px",borderRadius:20}}>
+                          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/></svg>
+                          Solo retiro
+                        </div>}
+                    <span style={{fontSize:12,fontWeight:700,color:C.electric,display:"flex",alignItems:"center",gap:4}}>
+                      Ver box
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="m9 18 6-6-6-6"/></svg>
+                    </span>
+                  </div>
+                </div>
+                {/* Línea de color */}
+                <div style={{height:2,background:`linear-gradient(90deg,${c1},${c2})`}}/>
               </div>
-              {/* Barra de color abajo */}
-              <div style={{height:3,background:`linear-gradient(90deg,${c1},${c2})`}}/>
-            </div>
-          );})}
+            );
+          })}
         </div>}
-{/* boxes disponibles no se muestran en la home - solo el admin los ve */}
       </div>
     </div>
   );
 }
 
-// ─── PRODUCT CARD (Tiendanube style) ─────────────────────────────────────────
+
+// ─── PRODUCT CARD (Estilo Cataleia/Premium) ──────────────────────────────────
 function ProductCard({p,box,qty,addToCart}){
   const [c1,c2]=catGrad(box.cat);
   const q=qty(p.id);
   const [hovered,setHovered]=useState(false);
   return(
     <div className="prod-card"
-      style={{background:"#fff",borderRadius:16,overflow:"hidden",boxShadow:"0 2px 12px rgba(0,0,0,.12)",position:"relative"}}
+      style={{background:"#fff",borderRadius:16,overflow:"hidden",boxShadow:"0 2px 16px rgba(0,0,0,.15)"}}
       onMouseEnter={()=>setHovered(true)} onMouseLeave={()=>setHovered(false)}>
-      {/* Imagen o emoji */}
-      <div style={{position:"relative",height:200,background:`linear-gradient(135deg,${c1}22,${c2}11)`,overflow:"hidden"}}>
+      {/* FOTO */}
+      <div style={{position:"relative",height:220,background:`linear-gradient(135deg,${c1}15,${c2}08)`,overflow:"hidden"}}>
         {p.img_url
-          ?<img src={p.img_url} alt={p.name} style={{width:"100%",height:"100%",objectFit:"cover",transition:"transform .4s",transform:hovered?"scale(1.06)":"scale(1)"}}/>
-          :<div style={{height:"100%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:72,filter:"drop-shadow(0 4px 12px rgba(0,0,0,.15))"}}>{p.emoji}</div>}
-        {/* Badge categoría */}
-        {p.subcategory&&<div style={{position:"absolute",top:10,left:10,background:`linear-gradient(135deg,${c1},${c2})`,color:"#fff",borderRadius:20,padding:"3px 10px",fontSize:10,fontWeight:800,letterSpacing:.8,textTransform:"uppercase",boxShadow:"0 2px 8px rgba(0,0,0,.2)"}}>{p.subcategory}</div>}
-        {/* Botón agregar al pasar mouse */}
-        {hovered&&q===0&&<div style={{position:"absolute",bottom:10,left:"50%",transform:"translateX(-50%)",width:"calc(100% - 20px)"}}>
-          <button className="btn" onClick={()=>addToCart(p,box)} style={{width:"100%",background:`linear-gradient(135deg,${c1},${c2})`,color:"#fff",padding:"10px",fontSize:13,fontWeight:800,borderRadius:10,boxShadow:"0 4px 16px rgba(0,0,0,.3)",display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
-            🛒 Agregar al carrito
-          </button>
-        </div>}
-      </div>
-      {/* Info */}
-      <div style={{padding:"14px 16px 16px"}}>
-        <p style={{fontWeight:800,fontSize:14,color:"#1a1a2e",lineHeight:1.3,marginBottom:4}}>{p.name}</p>
-        {p.description&&<p style={{color:"#888",fontSize:11,lineHeight:1.5,marginBottom:10}}>{p.description}</p>}
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8}}>
-          <span style={{fontSize:22,fontWeight:900,color:"#001B4E",fontFamily:"'Bebas Neue',sans-serif",letterSpacing:1}}>{fmt(p.price)}</span>
+          ?<img className="prod-img" src={p.img_url} alt={p.name} style={{position:"absolute",inset:0}}/>
+          :<div style={{height:"100%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:80,filter:"drop-shadow(0 4px 16px rgba(0,0,0,.1))",transition:"transform .5s",transform:hovered?"scale(1.1)":"scale(1)"}}>{p.emoji}</div>}
+        {/* Badges */}
+        <div style={{position:"absolute",top:10,left:10,display:"flex",flexDirection:"column",gap:4}}>
+          {p.is_new&&<span className="badge-nuevo">Nuevo</span>}
+          {p.on_sale&&<span className="badge-oferta">Oferta</span>}
+          {p.subcategory&&<span style={{background:"rgba(0,0,0,.6)",backdropFilter:"blur(8px)",color:"rgba(255,255,255,.9)",fontSize:9,fontWeight:800,padding:"3px 8px",borderRadius:20,letterSpacing:.8,textTransform:"uppercase"}}>{p.subcategory}</span>}
+        </div>
+        {/* Botón agregar - aparece al hacer hover */}
+        <div style={{position:"absolute",bottom:0,left:0,right:0,padding:"10px",background:"linear-gradient(to top,rgba(0,0,0,.7),transparent)",transform:hovered?"translateY(0)":"translateY(100%)",transition:"transform .3s cubic-bezier(.34,1.56,.64,1)"}}>
           {q===0
-            ?<button className="btn" onClick={()=>addToCart(p,box)} style={{background:`linear-gradient(135deg,${c1},${c2})`,color:"#fff",padding:"8px 14px",fontSize:12,borderRadius:10}}>+ Agregar</button>
-            :<div style={{display:"flex",alignItems:"center",gap:6,background:"#f5f7ff",borderRadius:10,padding:"4px 8px"}}>
-              <button className="btn" onClick={()=>addToCart({...p,_dec:true},box)} style={{background:`linear-gradient(135deg,${c1},${c2})`,color:"#fff",width:28,height:28,borderRadius:8,fontSize:16,display:"flex",alignItems:"center",justifyContent:"center"}}>−</button>
-              <span style={{fontWeight:900,color:"#001B4E",minWidth:20,textAlign:"center",fontSize:15}}>{q}</span>
-              <button className="btn" onClick={()=>addToCart(p,box)} style={{background:`linear-gradient(135deg,${c1},${c2})`,color:"#fff",width:28,height:28,borderRadius:8,fontSize:16,display:"flex",alignItems:"center",justifyContent:"center"}}>+</button>
+            ?<button className="btn" onClick={e=>{e.stopPropagation();addToCart(p,box);}}
+                style={{width:"100%",background:`linear-gradient(135deg,${c1},${c2})`,color:"#fff",padding:"11px",fontSize:13,fontWeight:800,borderRadius:12,display:"flex",alignItems:"center",justifyContent:"center",gap:8,boxShadow:`0 4px 16px ${c1}66`}}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                Agregar al carrito
+              </button>
+            :<div style={{display:"flex",alignItems:"center",gap:8,background:"rgba(0,0,0,.8)",borderRadius:12,padding:"6px 12px",backdropFilter:"blur(8px)"}}>
+              <button className="btn" onClick={e=>{e.stopPropagation();addToCart({...p,_dec:true},box);}} style={{background:`linear-gradient(135deg,${c1},${c2})`,color:"#fff",width:30,height:30,borderRadius:8,fontSize:18,display:"flex",alignItems:"center",justifyContent:"center",padding:0}}>−</button>
+              <span style={{fontWeight:900,color:"#fff",minWidth:20,textAlign:"center",fontSize:15}}>{q}</span>
+              <button className="btn" onClick={e=>{e.stopPropagation();addToCart(p,box);}} style={{background:`linear-gradient(135deg,${c1},${c2})`,color:"#fff",width:30,height:30,borderRadius:8,fontSize:18,display:"flex",alignItems:"center",justifyContent:"center",padding:0}}>+</button>
+              <span style={{color:"rgba(255,255,255,.6)",fontSize:12,marginLeft:4}}>en carrito</span>
             </div>}
         </div>
       </div>
+      {/* INFO */}
+      <div style={{padding:"14px 16px 18px"}}>
+        <p style={{fontWeight:800,fontSize:14,color:"#1a1a2e",lineHeight:1.3,marginBottom:4}}>{p.name}</p>
+        {p.description&&<p style={{color:"#999",fontSize:11,lineHeight:1.5,marginBottom:10}}>{p.description}</p>}
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8}}>
+          <div>
+            <span style={{fontSize:22,fontWeight:900,color:"#1a1a2e",fontFamily:"'Bebas Neue',sans-serif",letterSpacing:.5}}>{fmt(p.price)}</span>
+            {p.original_price&&<span style={{fontSize:13,color:"#bbb",textDecoration:"line-through",marginLeft:6}}>{fmt(p.original_price)}</span>}
+          </div>
+          {q===0
+            ?<button className="btn" onClick={e=>{e.stopPropagation();addToCart(p,box);}} style={{background:`linear-gradient(135deg,${c1},${c2})`,color:"#fff",padding:"8px 14px",fontSize:12,borderRadius:10,flexShrink:0}}>+ Agregar</button>
+            :<div style={{display:"flex",alignItems:"center",gap:6,background:"#f5f7ff",borderRadius:10,padding:"4px 8px",flexShrink:0}}>
+              <button className="btn" onClick={e=>{e.stopPropagation();addToCart({...p,_dec:true},box);}} style={{background:`linear-gradient(135deg,${c1},${c2})`,color:"#fff",width:26,height:26,borderRadius:7,fontSize:15,display:"flex",alignItems:"center",justifyContent:"center",padding:0}}>−</button>
+              <span style={{fontWeight:900,color:"#1a1a2e",minWidth:18,textAlign:"center",fontSize:14}}>{q}</span>
+              <button className="btn" onClick={e=>{e.stopPropagation();addToCart(p,box);}} style={{background:`linear-gradient(135deg,${c1},${c2})`,color:"#fff",width:26,height:26,borderRadius:7,fontSize:15,display:"flex",alignItems:"center",justifyContent:"center",padding:0}}>+</button>
+            </div>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── SHIPPING CALCULATOR ─────────────────────────────────────────────────────
+function ShippingCalc({box,c1,c2}){
+  const [cp,setCp]=useState("");
+  const [result,setResult]=useState(null);
+  const [loading,setLoading]=useState(false);
+
+  const calcShipping=async()=>{
+    if(cp.length<4) return;
+    setLoading(true);
+    // Simulación de cálculo (en producción se conecta a API de Correo/Andreani/OCA)
+    await new Promise(r=>setTimeout(r,800));
+    const base=box.delivery_cost||0;
+    const dist=Math.floor(Math.random()*800)+100; // km simulado
+    const cost=base===0?0:Math.max(base, Math.round(dist*12));
+    const days=dist<300?2:dist<600?4:6;
+    setResult({cost,days,cp});
+    setLoading(false);
+  };
+
+  return(
+    <div style={{marginTop:12,background:"rgba(0,194,255,.06)",border:"1px solid rgba(0,194,255,.15)",borderRadius:12,padding:"14px 16px",display:"inline-block",minWidth:280}}>
+      <p style={{fontSize:12,fontWeight:700,color:C.electric,marginBottom:10,display:"flex",alignItems:"center",gap:6}}>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M1 3h15v13H1zM16 8h4l3 3v5h-7V8z"/></svg>
+        Calcular envío a tu domicilio
+      </p>
+      <div style={{display:"flex",gap:8}}>
+        <input className="inp" value={cp} onChange={e=>setCp(e.target.value.replace(/\D/g,"").slice(0,8))} placeholder="Código postal" style={{width:140,padding:"8px 12px",fontSize:13}} onKeyDown={e=>e.key==="Enter"&&calcShipping()}/>
+        <button className="btn" onClick={calcShipping} disabled={loading||cp.length<4} style={{background:`linear-gradient(135deg,${c1},${c2})`,color:"#fff",padding:"8px 16px",fontSize:12,flexShrink:0}}>
+          {loading?<span style={{display:"inline-block",width:12,height:12,border:"2px solid rgba(255,255,255,.3)",borderTop:"2px solid #fff",borderRadius:"50%",animation:"spin 1s linear infinite"}}/>:"Calcular"}
+        </button>
+      </div>
+      {result&&<div style={{marginTop:10,padding:"10px 12px",background:"rgba(0,230,118,.08)",border:"1px solid rgba(0,230,118,.2)",borderRadius:8}}>
+        {result.cost===0
+          ?<p style={{color:C.success,fontSize:13,fontWeight:700}}>✓ Envío GRATIS a CP {result.cp}</p>
+          :<p style={{color:C.success,fontSize:13,fontWeight:700}}>📦 Envío a CP {result.cp}: <span style={{color:"#fff"}}>{fmt(result.cost)}</span></p>}
+        <p style={{color:C.muted,fontSize:11,marginTop:3}}>Entrega estimada: {result.days}-{result.days+1} días hábiles</p>
+        <p style={{color:C.dim,fontSize:10,marginTop:2}}>* Costo estimado. Confirmá con el box al comprar.</p>
+      </div>}
     </div>
   );
 }
@@ -467,6 +645,8 @@ function Catalog({boxId,boxes,products,cart,addToCart,setView,setActiveBox,loadi
             <p style={{color:C.muted,fontSize:14}}>{box.description}</p>
             {box.hours&&<p style={{color:C.muted,fontSize:12,marginTop:6,fontWeight:600}}>🕐 {box.hours}</p>}
             {box.whatsapp&&<a href={"https://wa.me/549"+box.whatsapp.replace(/\D/g,"")} target="_blank" rel="noreferrer" style={{display:"inline-flex",alignItems:"center",gap:7,background:"rgba(37,211,102,.12)",border:"1px solid rgba(37,211,102,.25)",borderRadius:10,padding:"7px 14px",fontSize:13,fontWeight:700,color:"#25D366",textDecoration:"none",marginTop:8}}>💬 Consultar por WhatsApp</a>}
+            {/* Calculador de envío por CP */}
+            {box.delivery&&<ShippingCalc box={box} c1={c1} c2={c2}/>}
           </div>
           <div style={{display:"flex",flexDirection:"column",gap:8,alignItems:"flex-end"}}>
             {box.delivery
@@ -506,15 +686,17 @@ function Catalog({boxId,boxes,products,cart,addToCart,setView,setActiveBox,loadi
         </div>
         :<div>
           {grouped.map((group,gi)=>(
-            <div key={gi} style={{marginBottom:group.title?36:0}}>
-              {/* Título de sección */}
-              {group.title&&<div style={{display:"flex",alignItems:"center",gap:14,marginBottom:16}}>
-                <div style={{height:2,flex:1,background:`linear-gradient(90deg,${c1}66,transparent)`}}/>
-                <span className="bebas" style={{fontSize:22,letterSpacing:2,color:C.electric,whiteSpace:"nowrap"}}>{group.title}</span>
-                <span style={{fontSize:11,color:C.dim,fontWeight:700,background:"rgba(255,255,255,.07)",padding:"3px 10px",borderRadius:20}}>{group.items.length} artículos</span>
-                <div style={{height:2,flex:1,background:`linear-gradient(270deg,${c1}66,transparent)`}}/>
+            <div key={gi} style={{marginBottom:group.title?40:0}}>
+              {/* Título de sección con diseño premium */}
+              {group.title&&<div style={{display:"flex",alignItems:"center",gap:16,marginBottom:20,padding:"0 4px"}}>
+                <div style={{height:1,flex:1,background:`linear-gradient(90deg,${c1}44,transparent)`}}/>
+                <div style={{display:"flex",alignItems:"center",gap:10,background:`linear-gradient(135deg,${c1}15,${c2}08)`,border:`1px solid ${c1}22`,borderRadius:30,padding:"6px 18px"}}>
+                  <span className="bebas" style={{fontSize:18,letterSpacing:2,color:C.electric}}>{group.title}</span>
+                  <span style={{fontSize:10,color:C.dim,fontWeight:800,background:"rgba(255,255,255,.08)",padding:"2px 8px",borderRadius:20,letterSpacing:.5}}>{group.items.length}</span>
+                </div>
+                <div style={{height:1,flex:1,background:`linear-gradient(270deg,${c1}44,transparent)`}}/>
               </div>}
-              <div className="sg" style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(200px,1fr))",gap:14}}>
+              <div className="sg" style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(210px,1fr))",gap:16}}>
                 {group.items.map(p=><ProductCard key={p.id} p={p} box={box} qty={qty} addToCart={addToCart}/>)}
               </div>
             </div>
@@ -598,6 +780,28 @@ function BoxPanel({user,boxes,setBoxes,products,setProducts,setToast}){
     setSaving(false);
   };
 
+  // Upload product image to Supabase Storage
+  const uploadProdImg=async(file, prodId)=>{
+    if(!file) return null;
+    try{
+      const ext=file.name.split(".").pop();
+      const path=`products/${box.id}/${prodId||Date.now()}.${ext}`;
+      await fetch(`${SUPABASE_URL}/storage/v1/object/box-images/${path}`,{
+        method:"POST",
+        headers:{apikey:SUPABASE_ANON_KEY,Authorization:`Bearer ${SUPABASE_ANON_KEY}`,"Content-Type":file.type},
+        body:file
+      });
+      return `${SUPABASE_URL}/storage/v1/object/public/box-images/${path}`;
+    }catch(e){return null;}
+  };
+
+  const [blankImg,setBlankImg]=useState(null);
+  const [blankImgPreview,setBlankImgPreview]=useState(null);
+  const [editImg,setEditImg]=useState(null);
+  const [editImgPreview,setEditImgPreview]=useState(null);
+  const blankImgRef=useRef();
+  const editImgRef=useRef();
+
   const saveInfo=async()=>{
     setSaving(true);
     try{
@@ -622,10 +826,19 @@ function BoxPanel({user,boxes,setBoxes,products,setProducts,setToast}){
     if(!blank.name||!blank.price) return showT("❌ Nombre y precio obligatorios");
     setSaving(true);
     try{
-      const res=await sb.from("products").insert({box_id:box.id,name:blank.name,price:Number(blank.price),emoji:blank.emoji,description:blank.description,subcategory:blank.subcategory||null});
+      // First insert to get ID
+      const res=await sb.from("products").insert({box_id:box.id,name:blank.name,price:Number(blank.price),emoji:blank.emoji,description:blank.description,subcategory:blank.subcategory||null,img_url:null});
       const newProd=Array.isArray(res)?res[0]:res;
-      setProducts(p=>({...p,[box.id]:[...(p[box.id]||[]),newProd]}));
-      setBlank({name:"",price:"",emoji:"📦",description:""});setAdding(false);
+      let img_url=null;
+      // Upload image if selected
+      if(blankImg&&newProd?.id){
+        img_url=await uploadProdImg(blankImg,newProd.id);
+        if(img_url) await sb.from("products").update({img_url},`id=eq.${newProd.id}`);
+      }
+      setProducts(p=>({...p,[box.id]:[...(p[box.id]||[]),{...newProd,img_url}]}));
+      setBlank({name:"",price:"",emoji:"📦",description:"",subcategory:""});
+      setBlankImg(null);setBlankImgPreview(null);
+      setAdding(false);
       showT("✓ Producto agregado");
     }catch(e){showT("❌ Error guardando");}
     setSaving(false);
@@ -634,9 +847,15 @@ function BoxPanel({user,boxes,setBoxes,products,setProducts,setToast}){
   const saveProd=async()=>{
     setSaving(true);
     try{
-      await sb.from("products").update({name:editing.name,price:editing.price,emoji:editing.emoji,description:editing.description,subcategory:editing.subcategory||null},`id=eq.${editing.id}`);
-      setProducts(p=>({...p,[box.id]:p[box.id].map(x=>x.id===editing.id?editing:x)}));
-      setEditing(null);showT("✓ Guardado");
+      let img_url=editing.img_url;
+      if(editImg){
+        const uploaded=await uploadProdImg(editImg,editing.id);
+        if(uploaded) img_url=uploaded;
+      }
+      await sb.from("products").update({name:editing.name,price:editing.price,emoji:editing.emoji,description:editing.description,subcategory:editing.subcategory||null,img_url},`id=eq.${editing.id}`);
+      setProducts(p=>({...p,[box.id]:p[box.id].map(x=>x.id===editing.id?{...editing,img_url}:x)}));
+      setEditing(null);setEditImg(null);setEditImgPreview(null);
+      showT("✓ Guardado");
     }catch(e){showT("❌ Error guardando");}
     setSaving(false);
   };
@@ -697,16 +916,44 @@ function BoxPanel({user,boxes,setBoxes,products,setProducts,setToast}){
           <p style={{color:C.muted,fontSize:13}}>{prods.length} productos en tu catálogo</p>
           <button className="btn" onClick={()=>{setAdding(true);setEditing(null);}} style={{background:`linear-gradient(135deg,${c1},${c2})`,color:"#fff",padding:"9px 18px",fontSize:13}}>+ Nuevo producto</button>
         </div>
-        {adding&&<div className="fade" style={{background:"rgba(0,194,255,.06)",border:"1px solid rgba(0,194,255,.2)",borderRadius:16,padding:22,marginBottom:16}}>
-          <h4 style={{fontWeight:800,fontSize:15,marginBottom:14,color:C.electric}}>➕ Nuevo producto</h4>
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:12}}>
-            <Field label="Nombre *" value={blank.name} onChange={v=>setBlank({...blank,name:v})}/>
-            <Field label="Precio $" value={blank.price} onChange={v=>setBlank({...blank,price:v})} type="number"/>
-            <Field label="Categoría del producto" value={blank.subcategory} onChange={v=>setBlank({...blank,subcategory:v})} placeholder="Ej: Remeras, Jeans, Buzos..." help="Agrupará los productos por tipo en el catálogo"/>
-            <Field label="Emoji" value={blank.emoji} onChange={v=>setBlank({...blank,emoji:v})}/>
-            <Field label="Descripción" value={blank.description} onChange={v=>setBlank({...blank,description:v})}/>
+        {adding&&<div className="fade" style={{background:"rgba(0,194,255,.06)",border:"1px solid rgba(0,194,255,.2)",borderRadius:20,padding:24,marginBottom:16}}>
+          <h4 style={{fontWeight:800,fontSize:16,marginBottom:18,color:C.electric}}>➕ Nuevo producto</h4>
+          <div style={{display:"grid",gridTemplateColumns:"200px 1fr",gap:16,marginBottom:16}}>
+            {/* Foto del producto */}
+            <div>
+              <Lbl>Foto del producto</Lbl>
+              <input ref={blankImgRef} type="file" accept="image/*" style={{display:"none"}} onChange={e=>{const f=e.target.files[0];if(f){setBlankImg(f);setBlankImgPreview(URL.createObjectURL(f));}}}/>
+              <div onClick={()=>blankImgRef.current.click()}
+                style={{width:"100%",height:160,borderRadius:14,border:`2px dashed ${blankImgPreview?"transparent":"rgba(0,194,255,.3)"}`,cursor:"pointer",overflow:"hidden",background:blankImgPreview?"transparent":`linear-gradient(135deg,${c1}11,${c2}11)`,display:"flex",alignItems:"center",justifyContent:"center",position:"relative",transition:"all .2s"}}
+                onMouseEnter={e=>e.currentTarget.style.borderColor=C.electric}
+                onMouseLeave={e=>e.currentTarget.style.borderColor=blankImgPreview?"transparent":"rgba(0,194,255,.3)"}>
+                {blankImgPreview
+                  ?<><img src={blankImgPreview} alt="" style={{width:"100%",height:"100%",objectFit:"cover"}}/>
+                    <div style={{position:"absolute",inset:0,background:"rgba(0,0,0,.4)",display:"flex",alignItems:"center",justifyContent:"center",opacity:0,transition:"opacity .2s"}} onMouseEnter={e=>e.currentTarget.style.opacity=1} onMouseLeave={e=>e.currentTarget.style.opacity=0}>
+                      <span style={{color:"#fff",fontWeight:700,fontSize:12}}>📷 Cambiar foto</span>
+                    </div></>
+                  :<div style={{textAlign:"center"}}>
+                    <div style={{fontSize:40,marginBottom:8}}>📷</div>
+                    <p style={{color:C.muted,fontSize:11,fontWeight:700}}>Subir foto</p>
+                    <p style={{color:C.dim,fontSize:10,marginTop:2}}>JPG, PNG, WEBP</p>
+                  </div>}
+              </div>
+              {blankImgPreview&&<button className="btn" onClick={()=>{setBlankImg(null);setBlankImgPreview(null);}} style={{width:"100%",marginTop:6,background:"rgba(255,23,68,.1)",color:C.danger,padding:"6px",fontSize:11}}>✕ Quitar foto</button>}
+            </div>
+            {/* Datos del producto */}
+            <div>
+              <Field label="Nombre *" value={blank.name} onChange={v=>setBlank({...blank,name:v})}/>
+              <Field label="Precio $" value={blank.price} onChange={v=>setBlank({...blank,price:v})} type="number"/>
+              <Field label="Categoría" value={blank.subcategory} onChange={v=>setBlank({...blank,subcategory:v})} placeholder="Ej: Remeras, Jeans..."/>
+              <Field label="Descripción" value={blank.description} onChange={v=>setBlank({...blank,description:v})}/>
+            </div>
           </div>
-          <div style={{display:"flex",gap:9}}><button className="btn" onClick={addProd} disabled={saving} style={{background:`linear-gradient(135deg,${c1},${c2})`,color:"#fff",padding:"9px 20px",fontSize:13}}>Guardar</button><button className="btn" onClick={()=>setAdding(false)} style={{background:"rgba(255,255,255,.06)",color:C.muted,padding:"9px 18px",fontSize:13}}>Cancelar</button></div>
+          <div style={{display:"flex",gap:9}}>
+            <button className="btn" onClick={addProd} disabled={saving} style={{background:`linear-gradient(135deg,${c1},${c2})`,color:"#fff",padding:"11px 24px",fontSize:14,boxShadow:`0 4px 16px rgba(0,0,0,.3)`}}>
+              {saving?"⏳ Guardando...":"✓ Guardar producto"}
+            </button>
+            <button className="btn" onClick={()=>{setAdding(false);setBlankImg(null);setBlankImgPreview(null);}} style={{background:"rgba(255,255,255,.06)",color:C.muted,padding:"11px 18px",fontSize:13}}>Cancelar</button>
+          </div>
         </div>}
         {prods.length===0&&!adding&&<div style={{textAlign:"center",padding:"48px",background:"rgba(255,255,255,.03)",border:"1px dashed rgba(255,255,255,.1)",borderRadius:16}}><div style={{fontSize:52,marginBottom:12}}>📦</div><p style={{fontWeight:700,fontSize:15}}>Todavía no tenés productos</p><p style={{color:C.muted,fontSize:13,marginTop:5}}>Tocá "+ Nuevo producto" para empezar</p></div>}
         <div style={{display:"flex",flexDirection:"column",gap:9}}>
@@ -947,22 +1194,48 @@ function AdminPanel({boxes,setBoxes,products,setProducts,shopConfig,setShopConfi
           <button className="btn" onClick={()=>saveConfig({...shopConfig,hours:[...shopConfig.hours,{day:"",time:""}]})} style={{background:"rgba(0,194,255,.1)",color:C.electric,padding:"8px 16px",fontSize:12,marginTop:6,border:"1px solid rgba(0,194,255,.2)"}}>+ Agregar horario</button>
         </div>
         <div style={{background:"rgba(255,255,255,.04)",border:"1px solid rgba(255,255,255,.08)",borderRadius:16,padding:24}}>
-          <h3 style={{fontWeight:800,fontSize:16,marginBottom:6}}>📢 Banners de novedades</h3>
-          <p style={{color:C.muted,fontSize:12,marginBottom:18}}>Aparecen arriba de la página, rotan automáticamente.</p>
-          {shopConfig.banners.map((b,i)=>(<div key={b.id} style={{display:"flex",gap:10,marginBottom:10,alignItems:"center",flexWrap:"wrap"}}>
-            <div style={{width:16,height:16,borderRadius:4,background:b.color,flexShrink:0}}/>
-            <div style={{flex:1,fontSize:13,color:b.active?C.light:C.dim,textDecoration:b.active?"none":"line-through"}}>{b.text}</div>
-            <button className="btn" onClick={()=>{const bs=[...shopConfig.banners];bs[i]={...bs[i],active:!bs[i].active};saveConfig({...shopConfig,banners:bs});}} style={{background:b.active?"rgba(255,23,68,.1)":"rgba(0,230,118,.1)",color:b.active?C.danger:C.success,padding:"6px 12px",fontSize:11}}>{b.active?"Ocultar":"Mostrar"}</button>
-            <button className="btn" onClick={()=>saveConfig({...shopConfig,banners:shopConfig.banners.filter(x=>x.id!==b.id)})} style={{background:"rgba(255,23,68,.1)",color:C.danger,padding:"6px 10px",fontSize:11}}>🗑️</button>
-          </div>))}
-          <div style={{marginTop:14,display:"flex",gap:10,flexWrap:"wrap",alignItems:"flex-end"}}>
-            <div style={{flex:1,minWidth:200}}><Lbl>Texto del banner</Lbl><input className="inp" value={newBanner.text} onChange={e=>setNewBanner({...newBanner,text:e.target.value})} placeholder="🎉 ¡Novedad del shopping!"/></div>
-            <div><Lbl>Color</Lbl><div style={{display:"flex",gap:6}}>
-              {[["linear-gradient(135deg,#FFD200,#FF6F00)","🟡"],["linear-gradient(135deg,#00C2FF,#0044AA)","🔵"],["linear-gradient(135deg,#FF1744,#C62828)","🔴"],["linear-gradient(135deg,#00E676,#00A152)","🟢"]].map(([g,ic])=>(
-                <div key={g} onClick={()=>setNewBanner({...newBanner,color:g})} style={{width:28,height:28,borderRadius:7,background:g,cursor:"pointer",border:newBanner.color===g?"3px solid #fff":"3px solid transparent",transition:"border .15s"}}/>
-              ))}
-            </div></div>
-            <button className="btn" onClick={()=>{if(!newBanner.text)return;saveConfig({...shopConfig,banners:[...shopConfig.banners,{...newBanner,id:Date.now()}]});setNewBanner({text:"",color:"linear-gradient(135deg,#FFD200,#FF6F00)",active:true});}} style={{background:"linear-gradient(135deg,#6D28D9,#4C1D95)",color:"#fff",padding:"10px 18px",fontSize:13}}>+ Agregar</button>
+          <h3 style={{fontWeight:800,fontSize:16,marginBottom:4}}>📢 Banners de novedades</h3>
+          <p style={{color:C.muted,fontSize:12,marginBottom:18}}>Rotan arriba de la página con animación. Podés agregar texto, color e ícono.</p>
+          {shopConfig.banners.map((b,i)=>(
+            <div key={b.id} style={{display:"flex",gap:10,marginBottom:10,alignItems:"center",flexWrap:"wrap",background:"rgba(255,255,255,.03)",borderRadius:12,padding:"10px 14px",border:"1px solid rgba(255,255,255,.06)"}}>
+              <div style={{width:32,height:32,borderRadius:8,background:b.color,flexShrink:0,boxShadow:"0 2px 8px rgba(0,0,0,.3)"}}/>
+              <div style={{flex:1}}>
+                <p style={{fontSize:13,color:b.active?C.light:C.dim,textDecoration:b.active?"none":"line-through",fontWeight:600}}>{b.text}</p>
+                <p style={{fontSize:10,color:C.dim,marginTop:2}}>{b.active?"● Activo":"○ Oculto"}</p>
+              </div>
+              <button className="btn" onClick={()=>{const bs=[...shopConfig.banners];bs[i]={...bs[i],active:!bs[i].active};saveConfig({...shopConfig,banners:bs});}} style={{background:b.active?"rgba(255,23,68,.1)":"rgba(0,230,118,.1)",color:b.active?C.danger:C.success,padding:"7px 14px",fontSize:12,border:`1px solid ${b.active?"rgba(255,23,68,.2)":"rgba(0,230,118,.2)"}`}}>{b.active?"Ocultar":"Mostrar"}</button>
+              <button className="btn" onClick={()=>saveConfig({...shopConfig,banners:shopConfig.banners.filter(x=>x.id!==b.id)})} style={{background:"rgba(255,23,68,.1)",color:C.danger,padding:"7px 12px",fontSize:12,border:"1px solid rgba(255,23,68,.2)"}}>🗑️</button>
+            </div>
+          ))}
+          <div style={{marginTop:16,background:"rgba(0,194,255,.04)",border:"1px solid rgba(0,194,255,.15)",borderRadius:14,padding:16}}>
+            <p style={{fontWeight:700,fontSize:13,color:C.electric,marginBottom:12}}>+ Nuevo banner</p>
+            <Field label="Ícono y texto" value={newBanner.text} onChange={v=>setNewBanner({...newBanner,text:v})} placeholder="🎉 ¡Gran liquidación de verano! Descuentos en todos los box"/>
+            <div style={{display:"flex",gap:10,alignItems:"flex-end",flexWrap:"wrap"}}>
+              <div style={{flex:1}}>
+                <Lbl>Color del banner</Lbl>
+                <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+                  {[
+                    ["linear-gradient(135deg,#FFD200,#FF6F00)","Dorado"],
+                    ["linear-gradient(135deg,#00C2FF,#0044AA)","Azul"],
+                    ["linear-gradient(135deg,#FF1744,#C62828)","Rojo"],
+                    ["linear-gradient(135deg,#00E676,#00A152)","Verde"],
+                    ["linear-gradient(135deg,#E040FB,#6A1B9A)","Violeta"],
+                    ["linear-gradient(135deg,#FF9800,#E65100)","Naranja"],
+                  ].map(([g,name])=>(
+                    <div key={g} onClick={()=>setNewBanner({...newBanner,color:g})}
+                      style={{width:36,height:36,borderRadius:10,background:g,cursor:"pointer",border:newBanner.color===g?"3px solid #fff":"3px solid transparent",transition:"all .2s",boxShadow:newBanner.color===g?"0 4px 12px rgba(0,0,0,.4)":"none",position:"relative"}}
+                      title={name}>
+                      {newBanner.color===g&&<div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",fontSize:14}}>✓</div>}
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <button className="btn" onClick={()=>{
+                if(!newBanner.text)return;
+                saveConfig({...shopConfig,banners:[...shopConfig.banners,{...newBanner,id:Date.now()}]});
+                setNewBanner({text:"",color:"linear-gradient(135deg,#FFD200,#FF6F00)",active:true});
+              }} style={{background:"linear-gradient(135deg,#6D28D9,#4C1D95)",color:"#fff",padding:"11px 20px",fontSize:13,flexShrink:0}}>+ Agregar banner</button>
+            </div>
           </div>
         </div>
       </div>}
@@ -1002,6 +1275,7 @@ export default function App(){
   const [shopConfig,setShopConfig] = useState({hours:[],banners:[]});
   const [toast,setToast]       = useState("");
   const [loading,setLoading]   = useState(true);
+  const [searchQuery,setSearchQuery] = useState("");
   const [loadingProds,setLoadingProds] = useState(false);
 
   // ── Cargar datos de Supabase al iniciar ──
@@ -1050,8 +1324,8 @@ export default function App(){
       {toast&&<Toast msg={toast}/>}
       {showLogin&&<LoginModal onClose={()=>setShowLogin(false)} onLogin={u=>{setUser(u);setShowLogin(false);setView(u.is_admin?"admin":"box-panel");}} setToast={showT}/>}
       <div style={{minHeight:"100vh",background:"#000B1E"}}>
-        <Nav view={view} setView={setView} setActiveBox={setActiveBox} cartN={cart.reduce((s,i)=>s+i.qty,0)} user={user} onLogout={()=>{setUser(null);setView("home");}} onLoginClick={()=>setShowLogin(true)}/>
-        {view==="home"      &&<Home boxes={boxes} shopConfig={shopConfig} setView={setView} setActiveBox={setActiveBox} loading={loading}/>}
+        <Nav view={view} setView={setView} setActiveBox={setActiveBox} cartN={cart.reduce((s,i)=>s+i.qty,0)} user={user} onLogout={()=>{setUser(null);setView("home");}} onLoginClick={()=>setShowLogin(true)} searchQuery={searchQuery} setSearchQuery={setSearchQuery}/>
+        {view==="home"      &&<Home boxes={boxes} shopConfig={shopConfig} setView={setView} setActiveBox={setActiveBox} loading={loading} searchQuery={searchQuery} setSearchQuery={setSearchQuery}/>}
         {view==="catalog"   &&activeBox&&<Catalog boxId={activeBox} boxes={boxes} products={products} cart={cart} addToCart={addToCart} setView={setView} setActiveBox={setActiveBox} loadingProds={loadingProds}/>}
         {view==="cart"      &&<Cart cart={cart} addToCart={addToCart} setView={setView} clearCart={()=>setCart([])}/>}
         {view==="box-panel" &&user&&!user.is_admin&&<BoxPanel user={user} boxes={boxes} setBoxes={setBoxes} products={products} setProducts={setProducts} setToast={showT}/>}
