@@ -1141,11 +1141,11 @@ function BoxPanel({user,boxes,setBoxes,products,setProducts,setToast}){
       <div style={{background:`linear-gradient(135deg,${c1}22,${c2}11)`,border:`1px solid ${c1}33`,borderRadius:22,padding:"24px",marginBottom:24,position:"relative",overflow:"hidden"}}>
         <div style={{position:"absolute",top:-40,right:-40,width:200,height:200,background:`radial-gradient(circle,${c1}22,transparent 70%)`,pointerEvents:"none"}}/>
         <div style={{display:"flex",alignItems:"center",gap:16,flexWrap:"wrap",position:"relative"}}>
-          <div style={{position:"relative",cursor:"pointer"}} onClick={()=>imgRef.current.click()}>
-            <input ref={imgRef} type="file" accept="image/*" style={{display:"none"}} onChange={uploadLogo}/>
+          <label style={{position:"relative",cursor:"pointer",display:"block"}}>
+            <input type="file" accept="image/*" style={{display:"none"}} onChange={uploadLogo}/>
             <BoxAvatar box={box} size={80} radius={16}/>
             <div style={{position:"absolute",bottom:-4,right:-4,background:`linear-gradient(135deg,${c1},${c2})`,borderRadius:"50%",width:26,height:26,display:"flex",alignItems:"center",justifyContent:"center",fontSize:13}}>📷</div>
-          </div>
+          </label>
           <div style={{flex:1}}>
             <p style={{color:C.dim,fontSize:10,fontWeight:700,letterSpacing:2.5,textTransform:"uppercase",marginBottom:4}}>PANEL DE BOX</p>
             <h1 className="bebas" style={{fontSize:36,letterSpacing:2,lineHeight:1}}>{box.business_name}</h1>
