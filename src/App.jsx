@@ -5,6 +5,7 @@ import { useState, useEffect, useRef } from "react";
 // Los encontrás en: Supabase → tu proyecto → Settings → API
 const SUPABASE_URL = "https://jnmbftanbytarnvfvczc.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpubWJmdGFuYnl0YXJudmZ2Y3pjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0Mjk4NjcsImV4cCI6MjA4OTAwNTg2N30.3lmepF-0SWbS5LXjGXC3p_8Tna2lN73jsiQtTvIgIrQ";
+
 // Cliente Supabase liviano — compatible con claves nuevas y legacy
 const sbHeaders = (extra={}) => ({
   "apikey": SUPABASE_ANON_KEY,
@@ -152,6 +153,7 @@ body{font-family:'Outfit',sans-serif;background:#09090f;color:#fff;min-height:10
   .grid-mobile-1{grid-template-columns:1fr!important}
   .grid-mobile-2{grid-template-columns:1fr 1fr!important}
 }
+textarea.inp{resize:vertical;min-height:80px;}
 `;
 
 // ─── SPINNER ──────────────────────────────────────────────────────────────────
@@ -277,6 +279,59 @@ function LoginModal({onClose,onLogin,setToast}){
         </button>
         <button className="btn" onClick={onClose} style={{width:"100%",background:"rgba(255,255,255,0.06)",color:C.muted,padding:"11px",fontSize:13,border:"1px solid rgba(255,255,255,.1)"}}>Cancelar</button>
       </div>
+    </div>
+  );
+}
+
+// ─── FEATURED PRODUCTS ────────────────────────────────────────────────────────
+function FeaturedProducts({boxes,setView,setActiveBox}){
+  const [featProds,setFeatProds]=useState([]);
+  const [loading,setLoading]=useState(true);
+
+  useEffect(()=>{
+    sb.from("products").selectWhere("*","featured=eq.true&active=eq.true&limit=8")
+      .then(d=>{if(Array.isArray(d))setFeatProds(d);})
+      .finally(()=>setLoading(false));
+  },[]);
+
+  if(!loading&&featProds.length===0) return null;
+
+  return(
+    <div style={{maxWidth:1400,margin:"0 auto",padding:"36px 24px 0"}}>
+      <div style={{display:"flex",alignItems:"center",gap:16,marginBottom:24}}>
+        <div style={{height:2,flex:1,background:"linear-gradient(90deg,rgba(0,194,255,.4),transparent)"}}/>
+        <div style={{display:"flex",alignItems:"center",gap:10}}>
+          <span style={{fontSize:22}}>🔥</span>
+          <span className="bebas" style={{fontSize:26,letterSpacing:2,color:C.light}}>DESTACADOS</span>
+        </div>
+        <div style={{height:2,flex:1,background:"linear-gradient(270deg,rgba(0,194,255,.4),transparent)"}}/>
+      </div>
+      {loading
+        ?<div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(180px,1fr))",gap:14}}>
+          {[1,2,3,4].map(i=><div key={i} className="skeleton" style={{height:240,borderRadius:14}}/>)}
+        </div>
+        :<div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(180px,1fr))",gap:14}}>
+          {featProds.map(p=>{
+            const box=boxes.find(b=>b.id===p.box_id);
+            if(!box) return null;
+            const [c1,c2]=catGrad(box.cat);
+            return(
+              <div key={p.id} className="prod-card" onClick={()=>{setActiveBox(box.id);setView("catalog");}}
+                style={{background:"#fff",borderRadius:14,overflow:"hidden",cursor:"pointer"}}>
+                <div style={{height:160,background:`linear-gradient(135deg,${c1}15,${c2}08)`,position:"relative",overflow:"hidden"}}>
+                  {p.img_url?<img src={p.img_url} alt={p.name} className="prod-img" style={{position:"absolute",inset:0,width:"100%",height:"100%",objectFit:"cover"}}/>
+                    :<div style={{height:"100%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:60}}>{p.emoji}</div>}
+                  {p.on_sale&&<span className="badge-oferta" style={{position:"absolute",top:8,left:8}}>Oferta</span>}
+                </div>
+                <div style={{padding:"10px 12px 12px"}}>
+                  <p style={{fontSize:10,color:"#aaa",marginBottom:2}}>{box.business_name}</p>
+                  <p style={{fontWeight:800,fontSize:12,color:"#1a1a2e",marginBottom:4,lineHeight:1.3}}>{p.name}</p>
+                  <span style={{fontSize:17,fontWeight:900,color:"#1a1a2e",fontFamily:"'Bebas Neue',sans-serif"}}>{fmt(p.on_sale&&p.sale_price>0?p.sale_price:p.price)}</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>}
     </div>
   );
 }
@@ -424,6 +479,9 @@ function Home({boxes,shopConfig,setView,setActiveBox,loading,searchQuery,setSear
         </div>
       </div>
 
+      {/* ── PRODUCTOS DESTACADOS ── */}
+      <FeaturedProducts boxes={boxes} setView={setView} setActiveBox={setActiveBox}/>
+
       {/* ── GRID DE BOXES ── */}
       <div id="boxes-section" style={{maxWidth:1400,margin:"0 auto",padding:"36px 24px 80px"}}>
         {/* Filtros */}
@@ -508,58 +566,116 @@ function Home({boxes,shopConfig,setView,setActiveBox,loading,searchQuery,setSear
 }
 
 
-// ─── PRODUCT CARD (Estilo Cataleia/Premium) ──────────────────────────────────
+// ─── PRODUCT CARD (Premium con talles, stock, badges, WhatsApp) ──────────────
 function ProductCard({p,box,qty,addToCart}){
   const [c1,c2]=catGrad(box.cat);
   const q=qty(p.id);
   const [hovered,setHovered]=useState(false);
+  const [selSize,setSelSize]=useState(null);
+  const [imgIdx,setImgIdx]=useState(0);
+  const sizes=p.sizes||[];
+  const images=[p.img_url,...(p.images||[])].filter(Boolean);
+  const hasSizes=sizes.length>0;
+  const outOfStock=p.stock===0;
+  const selSizeObj=hasSizes?sizes.find(s=>s.name===selSize):null;
+  const sizeOutOfStock=selSizeObj&&selSizeObj.stock===0;
+  const canAdd=!outOfStock&&(!hasSizes||selSize)&&!sizeOutOfStock;
+
+  const waMsg=()=>{
+    const sizeText=selSize?` · Talle: ${selSize}`:"";
+    return `https://wa.me/549${(box.whatsapp||"").replace(/\D/g,"")}?text=${encodeURIComponent(`Hola ${box.business_name}! Me interesa: ${p.name}${sizeText} — ${fmt(p.price)}`)}`
+  };
+
   return(
     <div className="prod-card"
-      style={{background:"#fff",borderRadius:16,overflow:"hidden",boxShadow:"0 2px 16px rgba(0,0,0,.15)"}}
+      style={{background:"#fff",borderRadius:16,overflow:"hidden",boxShadow:"0 2px 16px rgba(0,0,0,.15)",position:"relative"}}
       onMouseEnter={()=>setHovered(true)} onMouseLeave={()=>setHovered(false)}>
       {/* FOTO */}
       <div style={{position:"relative",height:220,background:`linear-gradient(135deg,${c1}15,${c2}08)`,overflow:"hidden"}}>
-        {p.img_url
-          ?<img className="prod-img" src={p.img_url} alt={p.name} style={{position:"absolute",inset:0}}/>
-          :<div style={{height:"100%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:80,filter:"drop-shadow(0 4px 16px rgba(0,0,0,.1))",transition:"transform .5s",transform:hovered?"scale(1.1)":"scale(1)"}}>{p.emoji}</div>}
+        {images.length>0
+          ?<img className="prod-img" src={images[imgIdx]} alt={p.name} style={{position:"absolute",inset:0,width:"100%",height:"100%",objectFit:"cover",transition:"transform .5s",transform:hovered?"scale(1.06)":"scale(1)"}}/>
+          :<div style={{height:"100%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:80,transition:"transform .5s",transform:hovered?"scale(1.1)":"scale(1)"}}>{p.emoji||"📦"}</div>}
+        
+        {/* Miniaturas de fotos */}
+        {images.length>1&&<div style={{position:"absolute",bottom:8,left:"50%",transform:"translateX(-50%)",display:"flex",gap:4}}>
+          {images.map((_,i)=><div key={i} onClick={e=>{e.stopPropagation();setImgIdx(i);}} style={{width:i===imgIdx?18:7,height:7,borderRadius:4,background:i===imgIdx?"rgba(255,255,255,.95)":"rgba(255,255,255,.5)",cursor:"pointer",transition:"all .2s"}}/>)}
+        </div>}
+
         {/* Badges */}
         <div style={{position:"absolute",top:10,left:10,display:"flex",flexDirection:"column",gap:4}}>
           {p.is_new&&<span className="badge-nuevo">Nuevo</span>}
           {p.on_sale&&<span className="badge-oferta">Oferta</span>}
-          {p.subcategory&&<span style={{background:"rgba(0,0,0,.6)",backdropFilter:"blur(8px)",color:"rgba(255,255,255,.9)",fontSize:9,fontWeight:800,padding:"3px 8px",borderRadius:20,letterSpacing:.8,textTransform:"uppercase"}}>{p.subcategory}</span>}
+          {outOfStock&&<span style={{background:"rgba(0,0,0,.7)",color:"#fff",fontSize:9,fontWeight:900,padding:"3px 8px",borderRadius:20,letterSpacing:.8}}>AGOTADO</span>}
         </div>
-        {/* Botón agregar - aparece al hacer hover */}
-        <div style={{position:"absolute",bottom:0,left:0,right:0,padding:"10px",background:"linear-gradient(to top,rgba(0,0,0,.7),transparent)",transform:hovered?"translateY(0)":"translateY(100%)",transition:"transform .3s cubic-bezier(.34,1.56,.64,1)"}}>
-          {q===0
-            ?<button className="btn" onClick={e=>{e.stopPropagation();addToCart(p,box);}}
-                style={{width:"100%",background:`linear-gradient(135deg,${c1},${c2})`,color:"#fff",padding:"11px",fontSize:13,fontWeight:800,borderRadius:12,display:"flex",alignItems:"center",justifyContent:"center",gap:8,boxShadow:`0 4px 16px ${c1}66`}}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-                Agregar al carrito
-              </button>
-            :<div style={{display:"flex",alignItems:"center",gap:8,background:"rgba(0,0,0,.8)",borderRadius:12,padding:"6px 12px",backdropFilter:"blur(8px)"}}>
-              <button className="btn" onClick={e=>{e.stopPropagation();addToCart({...p,_dec:true},box);}} style={{background:`linear-gradient(135deg,${c1},${c2})`,color:"#fff",width:30,height:30,borderRadius:8,fontSize:18,display:"flex",alignItems:"center",justifyContent:"center",padding:0}}>−</button>
-              <span style={{fontWeight:900,color:"#fff",minWidth:20,textAlign:"center",fontSize:15}}>{q}</span>
-              <button className="btn" onClick={e=>{e.stopPropagation();addToCart(p,box);}} style={{background:`linear-gradient(135deg,${c1},${c2})`,color:"#fff",width:30,height:30,borderRadius:8,fontSize:18,display:"flex",alignItems:"center",justifyContent:"center",padding:0}}>+</button>
-              <span style={{color:"rgba(255,255,255,.6)",fontSize:12,marginLeft:4}}>en carrito</span>
-            </div>}
-        </div>
+
+        {/* Botón WhatsApp arriba derecha */}
+        {box.whatsapp&&<a href={waMsg()} target="_blank" rel="noreferrer" onClick={e=>e.stopPropagation()}
+          style={{position:"absolute",top:10,right:10,background:"#25D366",borderRadius:"50%",width:32,height:32,display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,textDecoration:"none",boxShadow:"0 2px 8px rgba(37,211,102,.5)",zIndex:2,transition:"transform .2s"}}
+          onMouseEnter={e=>e.currentTarget.style.transform="scale(1.2)"} onMouseLeave={e=>e.currentTarget.style.transform="scale(1)"}>💬</a>}
+
+        {/* Botón agregar hover */}
+        {!outOfStock&&<div style={{position:"absolute",bottom:0,left:0,right:0,padding:"10px",background:"linear-gradient(to top,rgba(0,0,0,.75),transparent)",transform:hovered?"translateY(0)":"translateY(100%)",transition:"transform .3s cubic-bezier(.34,1.56,.64,1)"}}>
+          <button className="btn" onClick={e=>{e.stopPropagation();if(canAdd)addToCart({...p,selectedSize:selSize},box);}}
+            style={{width:"100%",background:canAdd?`linear-gradient(135deg,${c1},${c2})`:"rgba(255,255,255,.2)",color:"#fff",padding:"10px",fontSize:12,fontWeight:800,borderRadius:10,display:"flex",alignItems:"center",justifyContent:"center",gap:6,opacity:canAdd?1:.6}}>
+            🛒 {hasSizes&&!selSize?"Elegí un talle":"Agregar al carrito"}
+          </button>
+        </div>}
       </div>
+
       {/* INFO */}
-      <div style={{padding:"14px 16px 18px"}}>
-        <p style={{fontWeight:800,fontSize:14,color:"#1a1a2e",lineHeight:1.3,marginBottom:4}}>{p.name}</p>
-        {p.description&&<p style={{color:"#999",fontSize:11,lineHeight:1.5,marginBottom:10}}>{p.description}</p>}
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8}}>
-          <div>
-            <span style={{fontSize:22,fontWeight:900,color:"#1a1a2e",fontFamily:"'Bebas Neue',sans-serif",letterSpacing:.5}}>{fmt(p.price)}</span>
-            {p.original_price&&<span style={{fontSize:13,color:"#bbb",textDecoration:"line-through",marginLeft:6}}>{fmt(p.original_price)}</span>}
+      <div style={{padding:"12px 14px 14px"}}>
+        <p style={{fontWeight:800,fontSize:13,color:"#1a1a2e",lineHeight:1.3,marginBottom:3}}>{p.name}</p>
+        {p.description&&<p style={{color:"#aaa",fontSize:10,lineHeight:1.4,marginBottom:8}}>{p.description}</p>}
+        
+        {/* Precio */}
+        <div style={{display:"flex",alignItems:"center",gap:7,marginBottom:hasSizes?10:8}}>
+          <span style={{fontSize:20,fontWeight:900,color:"#1a1a2e",fontFamily:"'Bebas Neue',sans-serif",letterSpacing:.5}}>
+            {p.on_sale&&p.sale_price>0?fmt(p.sale_price):fmt(p.price)}
+          </span>
+          {p.on_sale&&p.sale_price>0&&<span style={{fontSize:12,color:"#bbb",textDecoration:"line-through"}}>{fmt(p.price)}</span>}
+        </div>
+
+        {/* TALLES */}
+        {hasSizes&&<div style={{marginBottom:10}}>
+          <p style={{fontSize:10,fontWeight:700,color:"#888",marginBottom:5,textTransform:"uppercase",letterSpacing:.8}}>Talle:</p>
+          <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>
+            {sizes.map(sz=>{
+              const noStock=sz.stock===0;
+              const selected=selSize===sz.name;
+              return(
+                <button key={sz.name} className="btn" onClick={e=>{e.stopPropagation();if(!noStock)setSelSize(sz.name);}}
+                  style={{padding:"4px 10px",fontSize:11,fontWeight:700,
+                    background:selected?`linear-gradient(135deg,${c1},${c2})`:"#f5f5f5",
+                    color:selected?"#fff":noStock?"#ccc":"#333",
+                    border:selected?"none":"1.5px solid #e0e0e0",
+                    borderRadius:6,
+                    textDecoration:noStock?"line-through":"none",
+                    opacity:noStock?.5:1,
+                    cursor:noStock?"not-allowed":"pointer",
+                    position:"relative"}}>
+                  {sz.name}
+                  {sz.stock>0&&sz.stock<=3&&!noStock&&<span style={{position:"absolute",top:-4,right:-4,background:"#FF9800",color:"#fff",fontSize:7,fontWeight:900,borderRadius:"50%",width:12,height:12,display:"flex",alignItems:"center",justifyContent:"center"}}>{sz.stock}</span>}
+                </button>
+              );
+            })}
           </div>
+          {selSize&&selSizeObj&&selSizeObj.stock>0&&selSizeObj.stock<=5&&<p style={{fontSize:10,color:"#FF9800",marginTop:4,fontWeight:600}}>⚡ Últimas {selSizeObj.stock} unidades</p>}
+        </div>}
+
+        {/* Botones abajo */}
+        <div style={{display:"flex",gap:6,alignItems:"center"}}>
           {q===0
-            ?<button className="btn" onClick={e=>{e.stopPropagation();addToCart(p,box);}} style={{background:`linear-gradient(135deg,${c1},${c2})`,color:"#fff",padding:"8px 14px",fontSize:12,borderRadius:10,flexShrink:0}}>+ Agregar</button>
-            :<div style={{display:"flex",alignItems:"center",gap:6,background:"#f5f7ff",borderRadius:10,padding:"4px 8px",flexShrink:0}}>
-              <button className="btn" onClick={e=>{e.stopPropagation();addToCart({...p,_dec:true},box);}} style={{background:`linear-gradient(135deg,${c1},${c2})`,color:"#fff",width:26,height:26,borderRadius:7,fontSize:15,display:"flex",alignItems:"center",justifyContent:"center",padding:0}}>−</button>
-              <span style={{fontWeight:900,color:"#1a1a2e",minWidth:18,textAlign:"center",fontSize:14}}>{q}</span>
-              <button className="btn" onClick={e=>{e.stopPropagation();addToCart(p,box);}} style={{background:`linear-gradient(135deg,${c1},${c2})`,color:"#fff",width:26,height:26,borderRadius:7,fontSize:15,display:"flex",alignItems:"center",justifyContent:"center",padding:0}}>+</button>
+            ?<button className="btn" onClick={e=>{e.stopPropagation();if(canAdd)addToCart({...p,selectedSize:selSize},box);}} disabled={!canAdd||outOfStock}
+                style={{flex:1,background:canAdd?`linear-gradient(135deg,${c1},${c2})`:"#e0e0e0",color:canAdd?"#fff":"#aaa",padding:"8px",fontSize:11,borderRadius:8}}>
+                {outOfStock?"Agotado":hasSizes&&!selSize?"Elegí talle":"+ Agregar"}
+              </button>
+            :<div style={{flex:1,display:"flex",alignItems:"center",gap:5,background:"#f5f7ff",borderRadius:8,padding:"3px 6px"}}>
+              <button className="btn" onClick={e=>{e.stopPropagation();addToCart({...p,_dec:true},box);}} style={{background:`linear-gradient(135deg,${c1},${c2})`,color:"#fff",width:24,height:24,borderRadius:6,fontSize:14,display:"flex",alignItems:"center",justifyContent:"center",padding:0}}>−</button>
+              <span style={{fontWeight:900,color:"#1a1a2e",flex:1,textAlign:"center",fontSize:13}}>{q}</span>
+              <button className="btn" onClick={e=>{e.stopPropagation();addToCart(p,box);}} style={{background:`linear-gradient(135deg,${c1},${c2})`,color:"#fff",width:24,height:24,borderRadius:6,fontSize:14,display:"flex",alignItems:"center",justifyContent:"center",padding:0}}>+</button>
             </div>}
+          {box.whatsapp&&<a href={waMsg()} target="_blank" rel="noreferrer" onClick={e=>e.stopPropagation()}
+            style={{background:"#25D366",color:"#fff",borderRadius:8,width:32,height:32,display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,textDecoration:"none",flexShrink:0,boxShadow:"0 2px 8px rgba(37,211,102,.3)"}}>💬</a>}
         </div>
       </div>
     </div>
@@ -726,6 +842,83 @@ function Catalog({boxId,boxes,products,cart,addToCart,setView,setActiveBox,loadi
             </div>
           ))}
         </div>}
+      {/* RESEÑAS */}
+      <ReviewsSection boxId={box.id} c1={c1} c2={c2}/>
+    </div>
+  );
+}
+
+// ─── REVIEWS ──────────────────────────────────────────────────────────────────
+function ReviewsSection({boxId,c1,c2}){
+  const [reviews,setReviews]=useState([]);
+  const [loading,setLoading]=useState(true);
+  const [form,setForm]=useState({author:"",rating:5,comment:""});
+  const [saving,setSaving]=useState(false);
+  const [showForm,setShowForm]=useState(false);
+
+  useEffect(()=>{
+    sb.from("reviews").selectWhere("*",`box_id=eq.${boxId}&order=created_at.desc`)
+      .then(d=>{if(Array.isArray(d))setReviews(d);})
+      .finally(()=>setLoading(false));
+  },[boxId]);
+
+  const submitReview=async()=>{
+    if(!form.author||!form.comment) return;
+    setSaving(true);
+    try{
+      const res=await sb.from("reviews").insert({box_id:boxId,...form,rating:Number(form.rating)});
+      const r=Array.isArray(res)?res[0]:res;
+      setReviews(p=>[r,...p]);
+      setForm({author:"",rating:5,comment:""});
+      setShowForm(false);
+    }catch(e){}
+    setSaving(false);
+  };
+
+  const avg=reviews.length>0?(reviews.reduce((s,r)=>s+r.rating,0)/reviews.length).toFixed(1):null;
+  const stars=n=>"★".repeat(n)+"☆".repeat(5-n);
+
+  return(
+    <div style={{marginTop:48,borderTop:"1px solid rgba(255,255,255,.07)",paddingTop:32}}>
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:20,flexWrap:"wrap",gap:12}}>
+        <div style={{display:"flex",alignItems:"center",gap:14}}>
+          <h2 className="bebas" style={{fontSize:28,letterSpacing:2,color:C.light}}>RESEÑAS</h2>
+          {avg&&<div style={{display:"flex",alignItems:"center",gap:6,background:`rgba(0,194,255,.1)`,border:"1px solid rgba(0,194,255,.2)",borderRadius:20,padding:"4px 14px"}}>
+            <span style={{color:"#FFD200",fontSize:16}}>★</span>
+            <span style={{fontWeight:900,fontSize:15,color:C.light}}>{avg}</span>
+            <span style={{color:C.dim,fontSize:12}}>({reviews.length})</span>
+          </div>}
+        </div>
+        <button className="btn" onClick={()=>setShowForm(!showForm)} style={{background:`linear-gradient(135deg,${c1},${c2})`,color:"#fff",padding:"9px 18px",fontSize:13}}>
+          {showForm?"Cancelar":"+ Dejar reseña"}
+        </button>
+      </div>
+      {showForm&&<div className="fade" style={{background:"rgba(255,255,255,.04)",border:"1px solid rgba(255,255,255,.08)",borderRadius:16,padding:20,marginBottom:20}}>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:10}}>
+          <div><Lbl>Tu nombre</Lbl><input className="inp" value={form.author} onChange={e=>setForm({...form,author:e.target.value})} placeholder="Tu nombre"/></div>
+          <div><Lbl>Puntaje</Lbl>
+            <div style={{display:"flex",gap:6,marginTop:4}}>
+              {[1,2,3,4,5].map(n=><button key={n} className="btn" onClick={()=>setForm({...form,rating:n})} style={{fontSize:20,background:"transparent",padding:"2px",color:n<=form.rating?"#FFD200":"rgba(255,255,255,.2)"}}>★</button>)}
+            </div>
+          </div>
+        </div>
+        <div style={{marginBottom:12}}><Lbl>Tu opinión</Lbl><textarea className="inp" value={form.comment} onChange={e=>setForm({...form,comment:e.target.value})} placeholder="¿Qué te pareció este box?" style={{minHeight:80,resize:"vertical"}}/></div>
+        <button className="btn" onClick={submitReview} disabled={saving||!form.author||!form.comment} style={{background:`linear-gradient(135deg,${c1},${c2})`,color:"#fff",padding:"10px 22px",fontSize:13}}>Enviar reseña</button>
+      </div>}
+      {loading?<div style={{textAlign:"center",padding:20,color:C.muted}}>Cargando reseñas...</div>
+      :reviews.length===0?<div style={{textAlign:"center",padding:24,color:C.dim,fontSize:14}}>Todavía no hay reseñas. ¡Sé el primero!</div>
+      :<div style={{display:"flex",flexDirection:"column",gap:10}}>
+        {reviews.map(r=>(
+          <div key={r.id} style={{background:"rgba(255,255,255,.04)",border:"1px solid rgba(255,255,255,.07)",borderRadius:14,padding:"14px 16px"}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}>
+              <span style={{fontWeight:800,fontSize:14,color:C.light}}>{r.author}</span>
+              <span style={{color:"#FFD200",fontSize:14,letterSpacing:1}}>{stars(r.rating)}</span>
+            </div>
+            <p style={{color:"rgba(255,255,255,.6)",fontSize:13,lineHeight:1.5}}>{r.comment}</p>
+            <p style={{color:C.dim,fontSize:10,marginTop:6}}>{new Date(r.created_at).toLocaleDateString("es-AR")}</p>
+          </div>
+        ))}
+      </div>}
     </div>
   );
 }
@@ -774,6 +967,37 @@ function Cart({cart,addToCart,setView,clearCart}){
   );
 }
 
+// ─── SIZES EDITOR ─────────────────────────────────────────────────────────────
+function SizesEditor({sizes,onChange,c1,c2}){
+  const [newSize,setNewSize]=useState({name:"",stock:1});
+  const addSize=()=>{
+    if(!newSize.name.trim()) return;
+    onChange([...sizes,{name:newSize.name.trim(),stock:Number(newSize.stock)}]);
+    setNewSize({name:"",stock:1});
+  };
+  return(
+    <div style={{background:"rgba(255,255,255,.03)",border:"1px solid rgba(255,255,255,.08)",borderRadius:12,padding:14}}>
+      <Lbl>Talles y stock por talle (opcional)</Lbl>
+      <div style={{display:"flex",flexWrap:"wrap",gap:6,marginBottom:10}}>
+        {sizes.map((sz,i)=>(
+          <div key={i} style={{display:"flex",alignItems:"center",gap:6,background:`rgba(0,194,255,.1)`,border:"1px solid rgba(0,194,255,.2)",borderRadius:8,padding:"4px 8px"}}>
+            <span style={{fontSize:12,fontWeight:700,color:C.light}}>{sz.name}</span>
+            <input type="number" value={sz.stock} onChange={e=>{const s=[...sizes];s[i]={...s[i],stock:Number(e.target.value)};onChange(s);}} style={{width:36,background:"transparent",border:"none",color:C.electric,fontSize:11,fontWeight:700,textAlign:"center",outline:"none"}} title="Stock"/>
+            <span style={{fontSize:9,color:C.dim}}>uds</span>
+            <button className="btn" onClick={()=>onChange(sizes.filter((_,j)=>j!==i))} style={{background:"rgba(255,23,68,.2)",color:"#FF1744",width:16,height:16,borderRadius:"50%",fontSize:10,display:"flex",alignItems:"center",justifyContent:"center",padding:0}}>✕</button>
+          </div>
+        ))}
+      </div>
+      <div style={{display:"flex",gap:8}}>
+        <input className="inp" value={newSize.name} onChange={e=>setNewSize({...newSize,name:e.target.value})} placeholder="Talle (XS, S, M, L, XL, 42...)" style={{flex:2,padding:"8px 12px",fontSize:12}} onKeyDown={e=>e.key==="Enter"&&addSize()}/>
+        <input className="inp" type="number" value={newSize.stock} onChange={e=>setNewSize({...newSize,stock:e.target.value})} placeholder="Stock" style={{flex:1,padding:"8px 12px",fontSize:12}} min="0"/>
+        <button className="btn" onClick={addSize} style={{background:`linear-gradient(135deg,${c1},${c2})`,color:"#fff",padding:"8px 14px",fontSize:12,flexShrink:0}}>+ Agregar</button>
+      </div>
+      <p style={{fontSize:10,color:C.dim,marginTop:6}}>Stock 0 = agotado · Stock -1 sin límite</p>
+    </div>
+  );
+}
+
 // ─── BOX PANEL ────────────────────────────────────────────────────────────────
 function BoxPanel({user,boxes,setBoxes,products,setProducts,setToast}){
   const box=boxes.find(b=>b.id===user.id)||user;
@@ -782,7 +1006,7 @@ function BoxPanel({user,boxes,setBoxes,products,setProducts,setToast}){
   const [editing,setEditing]=useState(null);
   const [adding,setAdding]=useState(false);
   const [saving,setSaving]=useState(false);
-  const [blank,setBlank]=useState({name:"",price:"",emoji:"📦",description:"",subcategory:""});
+  const [blank,setBlank]=useState({name:"",price:"",emoji:"📦",description:"",subcategory:"",sizes:[],stock:-1,is_new:false,on_sale:false,sale_price:0});
   const [info,setInfo]=useState({business_name:box.business_name,description:box.description,hours:box.hours||"",delivery:box.delivery,delivery_cost:box.delivery_cost,delivery_note:box.delivery_note,mp_link:box.mp_link||""});
   const [passForm,setPassForm]=useState({current:"",newp:"",confirm:""});
   const [c1,c2]=catGrad(box.cat);
@@ -848,21 +1072,27 @@ function BoxPanel({user,boxes,setBoxes,products,setProducts,setToast}){
     if(!blank.name||!blank.price) return showT("❌ Nombre y precio obligatorios");
     setSaving(true);
     try{
-      // First insert to get ID
-      const res=await sb.from("products").insert({box_id:box.id,name:blank.name,price:Number(blank.price),emoji:blank.emoji,description:blank.description,subcategory:blank.subcategory||null,img_url:null});
+      const prodData={
+        box_id:box.id,name:blank.name,price:Number(blank.price),
+        emoji:blank.emoji||"📦",description:blank.description,
+        subcategory:blank.subcategory||null,img_url:null,
+        sizes:blank.sizes||[],stock:blank.stock??-1,
+        is_new:blank.is_new||false,on_sale:blank.on_sale||false,
+        sale_price:blank.sale_price||0,images:[],featured:false
+      };
+      const res=await sb.from("products").insert(prodData);
       const newProd=Array.isArray(res)?res[0]:res;
       let img_url=null;
-      // Upload image if selected
       if(blankImg&&newProd?.id){
         img_url=await uploadProdImg(blankImg,newProd.id);
         if(img_url) await sb.from("products").update({img_url},`id=eq.${newProd.id}`);
       }
       setProducts(p=>({...p,[box.id]:[...(p[box.id]||[]),{...newProd,img_url}]}));
-      setBlank({name:"",price:"",emoji:"📦",description:"",subcategory:""});
+      setBlank({name:"",price:"",emoji:"📦",description:"",subcategory:"",sizes:[],stock:-1,is_new:false,on_sale:false,sale_price:0});
       setBlankImg(null);setBlankImgPreview(null);
       setAdding(false);
       showT("✓ Producto agregado");
-    }catch(e){showT("❌ Error guardando");}
+    }catch(e){showT("❌ Error guardando: "+e.message);}
     setSaving(false);
   };
 
@@ -940,38 +1170,50 @@ function BoxPanel({user,boxes,setBoxes,products,setProducts,setToast}){
         </div>
         {adding&&<div className="fade" style={{background:"rgba(0,194,255,.06)",border:"1px solid rgba(0,194,255,.2)",borderRadius:20,padding:24,marginBottom:16}}>
           <h4 style={{fontWeight:800,fontSize:16,marginBottom:18,color:C.electric}}>➕ Nuevo producto</h4>
-          <div style={{display:"grid",gridTemplateColumns:"200px 1fr",gap:16,marginBottom:16}}>
-            {/* Foto del producto */}
+          {/* Fila 1: foto + datos básicos */}
+          <div style={{display:"grid",gridTemplateColumns:"180px 1fr",gap:16,marginBottom:16}}>
             <div>
-              <Lbl>Foto del producto</Lbl>
+              <Lbl>Foto principal</Lbl>
               <input ref={blankImgRef} type="file" accept="image/*" style={{display:"none"}} onChange={e=>{const f=e.target.files[0];if(f){setBlankImg(f);setBlankImgPreview(URL.createObjectURL(f));}}}/>
               <div onClick={()=>blankImgRef.current.click()}
-                style={{width:"100%",height:160,borderRadius:14,border:`2px dashed ${blankImgPreview?"transparent":"rgba(0,194,255,.3)"}`,cursor:"pointer",overflow:"hidden",background:blankImgPreview?"transparent":`linear-gradient(135deg,${c1}11,${c2}11)`,display:"flex",alignItems:"center",justifyContent:"center",position:"relative",transition:"all .2s"}}
-                onMouseEnter={e=>e.currentTarget.style.borderColor=C.electric}
-                onMouseLeave={e=>e.currentTarget.style.borderColor=blankImgPreview?"transparent":"rgba(0,194,255,.3)"}>
+                style={{width:"100%",height:150,borderRadius:12,border:`2px dashed ${blankImgPreview?"transparent":"rgba(0,194,255,.3)"}`,cursor:"pointer",overflow:"hidden",background:blankImgPreview?"transparent":`linear-gradient(135deg,${c1}11,${c2}11)`,display:"flex",alignItems:"center",justifyContent:"center",position:"relative"}}>
                 {blankImgPreview
-                  ?<><img src={blankImgPreview} alt="" style={{width:"100%",height:"100%",objectFit:"cover"}}/>
-                    <div style={{position:"absolute",inset:0,background:"rgba(0,0,0,.4)",display:"flex",alignItems:"center",justifyContent:"center",opacity:0,transition:"opacity .2s"}} onMouseEnter={e=>e.currentTarget.style.opacity=1} onMouseLeave={e=>e.currentTarget.style.opacity=0}>
-                      <span style={{color:"#fff",fontWeight:700,fontSize:12}}>📷 Cambiar foto</span>
-                    </div></>
-                  :<div style={{textAlign:"center"}}>
-                    <div style={{fontSize:40,marginBottom:8}}>📷</div>
-                    <p style={{color:C.muted,fontSize:11,fontWeight:700}}>Subir foto</p>
-                    <p style={{color:C.dim,fontSize:10,marginTop:2}}>JPG, PNG, WEBP</p>
-                  </div>}
+                  ?<img src={blankImgPreview} alt="" style={{width:"100%",height:"100%",objectFit:"cover"}}/>
+                  :<div style={{textAlign:"center"}}><div style={{fontSize:36,marginBottom:6}}>📷</div><p style={{color:C.muted,fontSize:10,fontWeight:700}}>Subir foto</p></div>}
               </div>
-              {blankImgPreview&&<button className="btn" onClick={()=>{setBlankImg(null);setBlankImgPreview(null);}} style={{width:"100%",marginTop:6,background:"rgba(255,23,68,.1)",color:C.danger,padding:"6px",fontSize:11}}>✕ Quitar foto</button>}
+              {blankImgPreview&&<button className="btn" onClick={()=>{setBlankImg(null);setBlankImgPreview(null);}} style={{width:"100%",marginTop:4,background:"rgba(255,23,68,.1)",color:C.danger,padding:"5px",fontSize:10}}>✕ Quitar</button>}
             </div>
-            {/* Datos del producto */}
             <div>
               <Field label="Nombre *" value={blank.name} onChange={v=>setBlank({...blank,name:v})}/>
-              <Field label="Precio $" value={blank.price} onChange={v=>setBlank({...blank,price:v})} type="number"/>
-              <Field label="Categoría" value={blank.subcategory} onChange={v=>setBlank({...blank,subcategory:v})} placeholder="Ej: Remeras, Jeans..."/>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
+                <Field label="Precio $" value={blank.price} onChange={v=>setBlank({...blank,price:v})} type="number"/>
+                <Field label="Categoría" value={blank.subcategory} onChange={v=>setBlank({...blank,subcategory:v})} placeholder="Remeras..."/>
+              </div>
               <Field label="Descripción" value={blank.description} onChange={v=>setBlank({...blank,description:v})}/>
             </div>
           </div>
-          <div style={{display:"flex",gap:9}}>
-            <button className="btn" onClick={addProd} disabled={saving} style={{background:`linear-gradient(135deg,${c1},${c2})`,color:"#fff",padding:"11px 24px",fontSize:14,boxShadow:`0 4px 16px rgba(0,0,0,.3)`}}>
+          {/* Fila 2: badges y stock */}
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:10,marginBottom:16,background:"rgba(255,255,255,.03)",borderRadius:12,padding:14}}>
+            <div>
+              <Lbl>Stock total (-1 = sin límite)</Lbl>
+              <input className="inp" type="number" value={blank.stock??-1} onChange={e=>setBlank({...blank,stock:Number(e.target.value)})} style={{padding:"8px 12px"}}/>
+            </div>
+            <div style={{display:"flex",flexDirection:"column",gap:8,justifyContent:"flex-end"}}>
+              <label style={{display:"flex",alignItems:"center",gap:8,cursor:"pointer"}}>
+                <input type="checkbox" checked={blank.is_new||false} onChange={e=>setBlank({...blank,is_new:e.target.checked})} style={{width:16,height:16,accentColor:c1}}/>
+                <span style={{fontSize:12,fontWeight:700,color:C.light}}>🆕 Badge "Nuevo"</span>
+              </label>
+              <label style={{display:"flex",alignItems:"center",gap:8,cursor:"pointer"}}>
+                <input type="checkbox" checked={blank.on_sale||false} onChange={e=>setBlank({...blank,on_sale:e.target.checked})} style={{width:16,height:16,accentColor:c1}}/>
+                <span style={{fontSize:12,fontWeight:700,color:C.light}}>🏷️ Badge "Oferta"</span>
+              </label>
+            </div>
+            {blank.on_sale&&<Field label="Precio de oferta $" value={blank.sale_price||""} onChange={v=>setBlank({...blank,sale_price:Number(v)})} type="number"/>}
+          </div>
+          {/* Fila 3: talles */}
+          <SizesEditor sizes={blank.sizes||[]} onChange={sizes=>setBlank({...blank,sizes})} c1={c1} c2={c2}/>
+          <div style={{display:"flex",gap:9,marginTop:16}}>
+            <button className="btn" onClick={addProd} disabled={saving} style={{background:`linear-gradient(135deg,${c1},${c2})`,color:"#fff",padding:"11px 24px",fontSize:14}}>
               {saving?"⏳ Guardando...":"✓ Guardar producto"}
             </button>
             <button className="btn" onClick={()=>{setAdding(false);setBlankImg(null);setBlankImgPreview(null);}} style={{background:"rgba(255,255,255,.06)",color:C.muted,padding:"11px 18px",fontSize:13}}>Cancelar</button>
