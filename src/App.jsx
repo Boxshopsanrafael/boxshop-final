@@ -16,7 +16,7 @@ const sbHeaders = (extra={}) => ({
 const sb = {
   from: (table) => ({
     select: (cols="*") => fetch(
-      `${SUPABASE_URL}/rest/v1/${table}?select=${cols}&order=box_numbers`,
+      `${SUPABASE_URL}/rest/v1/${table}?select=${cols}`,
       { headers: sbHeaders({"Content-Type":"application/json"}) }
     ).then(async r=>{ const d=await r.json(); if(!r.ok) throw d; return d; }),
 
