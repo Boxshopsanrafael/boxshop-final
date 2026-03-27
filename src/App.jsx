@@ -6,59 +6,74 @@ import { useState, useEffect, useRef } from "react";
 const SUPABASE_URL = "https://jnmbftanbytarnvfvczc.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpubWJmdGFuYnl0YXJudmZ2Y3pjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0Mjk4NjcsImV4cCI6MjA4OTAwNTg2N30.3lmepF-0SWbS5LXjGXC3p_8Tna2lN73jsiQtTvIgIrQ";
 
-// Cliente Supabase liviano — compatible con claves nuevas y legacy
-const sbHeaders = (extra={}) => ({
+// Cliente Supabase — versión robusta
+const SB_HEADERS = {
   "apikey": SUPABASE_ANON_KEY,
-  "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
-  ...extra
-});
+  "Authorization": "Bearer " + SUPABASE_ANON_KEY,
+  "Content-Type": "application/json"
+};
+
+async function sbFetch(url, opts={}) {
+  const res = await fetch(url, {
+    ...opts,
+    headers: { ...SB_HEADERS, ...(opts.headers||{}) }
+  });
+  const text = await res.text();
+  let data;
+  try { data = JSON.parse(text); } catch(e) { data = text; }
+  if (!res.ok) throw new Error(JSON.stringify(data));
+  return data;
+}
 
 const sb = {
   from: (table) => ({
-    select: (cols="*") => fetch(
-      `${SUPABASE_URL}/rest/v1/${table}?select=${cols}`,
-      { headers: sbHeaders({"Content-Type":"application/json"}) }
-    ).then(async r=>{ const d=await r.json(); if(!r.ok) throw d; return d; }),
+    select: (cols="*") =>
+      sbFetch(`${SUPABASE_URL}/rest/v1/${table}?select=${cols}`),
 
-    selectWhere: (cols="*", filter="") => fetch(
-      `${SUPABASE_URL}/rest/v1/${table}?select=${cols}&${filter}`,
-      { headers: sbHeaders({"Content-Type":"application/json"}) }
-    ).then(async r=>{ const d=await r.json(); if(!r.ok) throw d; return d; }),
+    selectWhere: (cols="*", filter="") =>
+      sbFetch(`${SUPABASE_URL}/rest/v1/${table}?select=${cols}&${filter}`),
 
-    insert: (data) => fetch(
-      `${SUPABASE_URL}/rest/v1/${table}`,
-      { method:"POST", headers: sbHeaders({"Content-Type":"application/json","Prefer":"return=representation"}), body: JSON.stringify(data) }
-    ).then(async r=>{ const d=await r.json(); if(!r.ok) throw d; return d; }),
+    insert: (data) =>
+      sbFetch(`${SUPABASE_URL}/rest/v1/${table}`, {
+        method:"POST",
+        headers:{"Prefer":"return=representation"},
+        body: JSON.stringify(data)
+      }),
 
-    update: (data, filter) => fetch(
-      `${SUPABASE_URL}/rest/v1/${table}?${filter}`,
-      { method:"PATCH", headers: sbHeaders({"Content-Type":"application/json","Prefer":"return=representation"}), body: JSON.stringify(data) }
-    ).then(async r=>{ const d=await r.json(); if(!r.ok) throw d; return d; }),
+    update: (data, filter) =>
+      sbFetch(`${SUPABASE_URL}/rest/v1/${table}?${filter}`, {
+        method:"PATCH",
+        headers:{"Prefer":"return=representation"},
+        body: JSON.stringify(data)
+      }),
 
-    delete: (filter) => fetch(
-      `${SUPABASE_URL}/rest/v1/${table}?${filter}`,
-      { method:"DELETE", headers: sbHeaders() }
-    ).then(r=>r.ok),
+    delete: (filter) =>
+      sbFetch(`${SUPABASE_URL}/rest/v1/${table}?${filter}`, {
+        method:"DELETE"
+      }).catch(()=>true),
   }),
 
   storage: {
     upload: async (path, file) => {
-      // Try PUT first (upsert), then POST
-      const res = await fetch(
-        `${SUPABASE_URL}/storage/v1/object/box-images/${path}`,
-        { method:"POST", headers: sbHeaders({"x-upsert":"true","Content-Type":file.type}), body: file }
-      );
-      if(!res.ok){
-        // Try with PUT
-        const res2 = await fetch(
+      try {
+        const res = await fetch(
           `${SUPABASE_URL}/storage/v1/object/box-images/${path}`,
-          { method:"PUT", headers: sbHeaders({"Content-Type":file.type}), body: file }
+          {
+            method:"POST",
+            headers:{
+              "apikey": SUPABASE_ANON_KEY,
+              "Authorization": "Bearer " + SUPABASE_ANON_KEY,
+              "Content-Type": file.type,
+              "x-upsert": "true"
+            },
+            body: file
+          }
         );
-        return res2.ok;
-      }
-      return true;
+        return res.ok;
+      } catch(e) { return false; }
     },
-    publicUrl: (path) => `${SUPABASE_URL}/storage/v1/object/public/box-images/${path}`,
+    publicUrl: (path) =>
+      `${SUPABASE_URL}/storage/v1/object/public/box-images/${path}`,
   }
 };
 
@@ -1555,7 +1570,10 @@ export default function App(){
           const cfg=configData[0];
           setShopConfig({hours:cfg.hours||[],banners:cfg.banners||[]});
         }
-      }catch(e){console.error("Error cargando datos:",e);}
+      }catch(e){
+        console.error("Error cargando datos:",e);
+        // Show boxes 0 but don't crash
+      }
       setLoading(false);
     })();
   },[]);
