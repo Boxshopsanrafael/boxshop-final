@@ -351,6 +351,35 @@ function FeaturedProducts({boxes,setView,setActiveBox}){
   );
 }
 
+// ─── PROMO SECTION ────────────────────────────────────────────────────────────
+function PromoSection({shopConfig}){
+  const promos=(shopConfig?.promos||[]).filter(p=>p.active);
+  if(promos.length===0) return null;
+  return(
+    <div style={{maxWidth:1400,margin:"0 auto",padding:"0 24px 36px"}}>
+      <div style={{display:"flex",alignItems:"center",gap:16,marginBottom:20}}>
+        <div style={{height:2,flex:1,background:"linear-gradient(90deg,rgba(255,215,0,.4),transparent)"}}/>
+        <div style={{display:"flex",alignItems:"center",gap:10}}>
+          <span style={{fontSize:22}}>🎁</span>
+          <span className="bebas" style={{fontSize:26,letterSpacing:2,color:C.light}}>PROMOCIONES</span>
+        </div>
+        <div style={{height:2,flex:1,background:"linear-gradient(270deg,rgba(255,215,0,.4),transparent)"}}/>
+      </div>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))",gap:14}}>
+        {promos.map((p,i)=>(
+          <div key={i} style={{background:p.color||"linear-gradient(135deg,#FFD200,#FF6F00)",borderRadius:16,padding:"20px 22px",position:"relative",overflow:"hidden",boxShadow:"0 4px 20px rgba(0,0,0,.2)"}}>
+            <div style={{position:"absolute",top:-20,right:-20,width:100,height:100,background:"rgba(255,255,255,.1)",borderRadius:"50%"}}/>
+            <div style={{position:"absolute",bottom:-30,left:-10,width:80,height:80,background:"rgba(255,255,255,.08)",borderRadius:"50%"}}/>
+            <p style={{fontWeight:900,fontSize:16,color:"#fff",marginBottom:6,position:"relative"}}>{p.title}</p>
+            <p style={{fontSize:13,color:"rgba(255,255,255,.85)",lineHeight:1.5,position:"relative"}}>{p.description}</p>
+            {p.expiry&&<p style={{fontSize:10,color:"rgba(255,255,255,.6)",marginTop:8,position:"relative"}}>Válido hasta: {p.expiry}</p>}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ─── HOME ─────────────────────────────────────────────────────────────────────
 function Home({boxes,shopConfig,setView,setActiveBox,loading,searchQuery,setSearchQuery}){
   const [cat,setCat]=useState("Todos");
@@ -358,7 +387,13 @@ function Home({boxes,shopConfig,setView,setActiveBox,loading,searchQuery,setSear
   const [bannerAnim,setBannerAnim]=useState(true);
   const activeBanners=(shopConfig?.banners||[]).filter(b=>b.active);
   const cats=["Todos",...[...new Set(boxes.filter(b=>b.active&&b.cat).map(b=>b.cat))]];
-  const visible=boxes.filter(b=>b.active).filter(b=>cat==="Todos"||b.cat===cat);
+  const visible=boxes.filter(b=>b.active)
+    .filter(b=>cat==="Todos"||b.cat===cat)
+    .filter(b=>!searchQuery||
+      b.business_name.toLowerCase().includes(searchQuery.toLowerCase())||
+      b.description?.toLowerCase().includes(searchQuery.toLowerCase())||
+      b.cat?.toLowerCase().includes(searchQuery.toLowerCase())
+    );
   const available=boxes.filter(b=>!b.active);
 
   // Banner auto-rotate
@@ -415,12 +450,18 @@ function Home({boxes,shopConfig,setView,setActiveBox,loading,searchQuery,setSear
             </div>
           </div>
           {/* Tagline */}
-          <h1 style={{color:"rgba(255,255,255,.92)",fontSize:"clamp(16px,2.5vw,22px)",fontWeight:300,marginBottom:8,letterSpacing:2,textTransform:"uppercase",animation:"heroTextIn .8s .2s both"}}>
+          <h1 style={{color:"rgba(255,255,255,.92)",fontSize:"clamp(16px,2.5vw,24px)",fontWeight:300,marginBottom:8,letterSpacing:2,textTransform:"uppercase",animation:"heroTextIn .8s .2s both"}}>
             Todo lo que necesitás en un solo lugar
           </h1>
-          <p style={{color:"rgba(255,255,255,.55)",fontSize:"clamp(12px,1.5vw,15px)",marginBottom:32,letterSpacing:1,animation:"heroTextIn .8s .35s both"}}>
+          <p style={{color:"rgba(255,255,255,.6)",fontSize:"clamp(12px,1.5vw,16px)",marginBottom:16,letterSpacing:1,animation:"heroTextIn .8s .35s both"}}>
             Av. Rivadavia 135 · San Rafael, Mendoza
           </p>
+          {/* Badges animados */}
+          <div style={{display:"flex",gap:8,justifyContent:"center",flexWrap:"wrap",marginBottom:28,animation:"heroTextIn .8s .45s both"}}>
+            {["31 box en un solo lugar","Moda · Gastronomía · Tecnología · Más","Lun a Dom · San Rafael"].map((t,i)=>(
+              <span key={i} style={{background:"rgba(255,255,255,.1)",backdropFilter:"blur(8px)",border:"1px solid rgba(255,255,255,.2)",borderRadius:30,padding:"5px 14px",fontSize:11,fontWeight:600,color:"rgba(255,255,255,.85)",letterSpacing:.5}}>{t}</span>
+            ))}
+          </div>
           {/* Botones */}
           <div style={{display:"flex",gap:12,justifyContent:"center",flexWrap:"wrap",animation:"heroTextIn .8s .5s both"}}>
             <button className="btn" onClick={()=>document.getElementById("boxes-section")?.scrollIntoView({behavior:"smooth"})}
@@ -496,6 +537,8 @@ function Home({boxes,shopConfig,setView,setActiveBox,loading,searchQuery,setSear
 
       {/* ── PRODUCTOS DESTACADOS ── */}
       <FeaturedProducts boxes={boxes} setView={setView} setActiveBox={setActiveBox}/>
+      {/* ── PROMOCIONES DEL SHOPPING ── */}
+      <PromoSection shopConfig={shopConfig}/>
 
       {/* ── GRID DE BOXES ── */}
       <div id="boxes-section" style={{maxWidth:1400,margin:"0 auto",padding:"36px 24px 80px"}}>
@@ -557,7 +600,7 @@ function Home({boxes,shopConfig,setView,setActiveBox,loading,searchQuery,setSear
                     {box.delivery
                       ?<div style={{display:"flex",alignItems:"center",gap:5,fontSize:11,fontWeight:700,color:"#00E676",background:"rgba(0,230,118,.1)",padding:"5px 12px",borderRadius:20,border:"1px solid rgba(0,230,118,.15)"}}>
                           <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M1 3h15v13H1zM16 8h4l3 3v5h-7V8z"/></svg>
-                          {box.delivery_cost===0?"Envío gratis":`Envío ${fmt(box.delivery_cost)}`}
+                          {box.delivery_cost===0?"Envío gratis":box.delivery_min_order>0?`Gratis desde ${fmt(box.delivery_min_order)}`:`Envío ${fmt(box.delivery_cost)}`}
                         </div>
                       :<div style={{display:"flex",alignItems:"center",gap:5,fontSize:11,fontWeight:600,color:"rgba(255,255,255,.3)",background:"rgba(255,255,255,.04)",padding:"5px 12px",borderRadius:20}}>
                           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/></svg>
@@ -783,7 +826,7 @@ function Catalog({boxId,boxes,products,cart,addToCart,setView,setActiveBox,loadi
 
   return(
     <div className="fade" style={{maxWidth:1280,margin:"0 auto",padding:"28px 24px 64px"}}>
-      <button className="btn" onClick={()=>{setView("home");setActiveBox(null);}} style={{background:"rgba(255,255,255,.06)",color:C.muted,border:"1px solid rgba(255,255,255,.1)",padding:"8px 16px",fontSize:12,marginBottom:24}}>← Volver a boxes</button>
+      <button className="btn" onClick={()=>{setView("home");setActiveBox(null);}} style={{background:"rgba(255,255,255,.06)",color:C.muted,border:"1px solid rgba(255,255,255,.1)",padding:"8px 16px",fontSize:12,marginBottom:24}}>← Volver al shopping</button>
 
       {/* Header del box */}
       <div style={{background:`linear-gradient(135deg,${c1}22,${c2}11)`,border:`1px solid ${c1}33`,borderRadius:24,padding:"28px",marginBottom:hasSubcats?20:28,position:"relative",overflow:"hidden"}}>
@@ -799,13 +842,14 @@ function Catalog({boxId,boxes,products,cart,addToCart,setView,setActiveBox,loadi
             <h1 className="bebas" style={{fontSize:42,letterSpacing:2,marginBottom:6,lineHeight:1}}>{box.business_name}</h1>
             <p style={{color:C.muted,fontSize:14}}>{box.description}</p>
             {box.hours&&<p style={{color:C.muted,fontSize:12,marginTop:6,fontWeight:600}}>🕐 {box.hours}</p>}
+            {box.welcome_msg&&<div style={{marginTop:10,background:`linear-gradient(135deg,${c1}15,${c2}08)`,border:`1px solid ${c1}33`,borderRadius:10,padding:"10px 14px",fontSize:13,color:C.light,fontStyle:"italic"}}>💬 {box.welcome_msg}</div>}
             {box.whatsapp&&<a href={"https://wa.me/549"+box.whatsapp.replace(/\D/g,"")} target="_blank" rel="noreferrer" style={{display:"inline-flex",alignItems:"center",gap:7,background:"rgba(37,211,102,.12)",border:"1px solid rgba(37,211,102,.25)",borderRadius:10,padding:"7px 14px",fontSize:13,fontWeight:700,color:"#25D366",textDecoration:"none",marginTop:8}}>💬 Consultar por WhatsApp</a>}
             {/* Calculador de envío por CP */}
             {box.delivery&&<ShippingCalc box={box} c1={c1} c2={c2}/>}
           </div>
           <div style={{display:"flex",flexDirection:"column",gap:8,alignItems:"flex-end"}}>
             {box.delivery
-              ?<span style={{background:"rgba(0,230,118,.12)",color:C.success,fontWeight:800,fontSize:13,padding:"10px 16px",borderRadius:12,display:"block",border:"1px solid rgba(0,230,118,.2)"}}>🚚 {box.delivery_cost===0?"Envío gratis":`Envío ${fmt(box.delivery_cost)}`}</span>
+              ?<span style={{background:"rgba(0,230,118,.12)",color:C.success,fontWeight:800,fontSize:13,padding:"10px 16px",borderRadius:12,display:"block",border:"1px solid rgba(0,230,118,.2)"}}>🚚 {box.delivery_cost===0?"Envío gratis":box.delivery_min_order>0?`Gratis desde ${fmt(box.delivery_min_order)}`:`Envío ${fmt(box.delivery_cost)}`}</span>
               :<span style={{background:"rgba(255,255,255,.06)",color:C.muted,fontWeight:600,fontSize:13,padding:"10px 16px",borderRadius:12,display:"block"}}>📦 Solo retiro en box</span>}
             {box.courier_name&&<span style={{background:"rgba(0,194,255,.08)",color:C.electric,fontWeight:700,fontSize:11,padding:"6px 12px",borderRadius:10,display:"block",border:"1px solid rgba(0,194,255,.15)"}}>📦 {box.courier_name}{box.courier_desc?" · "+box.courier_desc:""}</span>}
           </div>
@@ -946,7 +990,7 @@ function Cart({cart,addToCart,setView,clearCart}){
   const allPaid=Object.keys(byBox).length>0&&Object.keys(byBox).every(id=>paid[id]);
   const waMsg=(box,items)=>{const sub=items.reduce((s,i)=>s+i.price*i.qty,0);const lines=items.map(i=>`• ${i.name} x${i.qty} — ${fmt(i.price*i.qty)}`).join("\n");return `https://wa.me/?text=${encodeURIComponent(`Hola ${box.business_name} 👋\nPedido desde Box Shop:\n\n${lines}\n\nTotal: ${fmt(sub)}\n\n¿Me compartís tu link de pago?`)}`;}
   if(allPaid)return(<div className="fade" style={{maxWidth:520,margin:"52px auto",padding:"0 24px",textAlign:"center"}}><div style={{background:"linear-gradient(145deg,#001B4E,#000B1E)",border:"1px solid rgba(0,194,255,.3)",borderRadius:24,padding:"48px 32px",marginBottom:20}}><div style={{fontSize:72,marginBottom:16,animation:"float 2s ease infinite"}}>🎉</div><h2 className="bebas" style={{fontSize:52,letterSpacing:3,background:"linear-gradient(135deg,#00C2FF,#FFD200)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",marginBottom:8}}>¡LISTO!</h2><p style={{color:C.muted,fontSize:15}}>Tus pedidos fueron enviados.</p></div><button className="btn" onClick={()=>{clearCart();setView("home");setPaid({});}} style={{background:"linear-gradient(135deg,#00C2FF,#0044AA)",color:"#fff",padding:"14px",fontSize:15,width:"100%",borderRadius:14}}>Seguir comprando</button></div>);
-  if(cart.length===0)return(<div className="fade" style={{textAlign:"center",padding:"80px 24px"}}><div style={{fontSize:80,marginBottom:16,animation:"float 3s ease infinite"}}>🛒</div><h2 className="bebas" style={{fontSize:46,letterSpacing:3,marginBottom:12,background:"linear-gradient(135deg,#fff,#00C2FF)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>CARRITO VACÍO</h2><p style={{color:C.muted,marginBottom:32}}>Explorá los boxes de Box Shop</p><button className="btn" onClick={()=>setView("home")} style={{background:"linear-gradient(135deg,#00C2FF,#0044AA)",color:"#fff",padding:"13px 32px",fontSize:15}}>Ver boxes →</button></div>);
+  if(cart.length===0)return(<div className="fade" style={{textAlign:"center",padding:"80px 24px"}}><div style={{fontSize:80,marginBottom:16,animation:"float 3s ease infinite"}}>🛒</div><h2 className="bebas" style={{fontSize:46,letterSpacing:3,marginBottom:12,background:"linear-gradient(135deg,#fff,#00C2FF)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>CARRITO VACÍO</h2><p style={{color:C.muted,marginBottom:32}}>Explorá los box de Box Shop</p><button className="btn" onClick={()=>setView("home")} style={{background:"linear-gradient(135deg,#00C2FF,#0044AA)",color:"#fff",padding:"13px 32px",fontSize:15}}>Ver boxes →</button></div>);
   return(
     <div className="fade" style={{maxWidth:820,margin:"0 auto",padding:"28px 24px 64px"}}>
       <h1 className="bebas" style={{fontSize:48,letterSpacing:3,marginBottom:6,background:"linear-gradient(135deg,#fff,#00C2FF)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>TU CARRITO</h1>
@@ -1022,7 +1066,7 @@ function BoxPanel({user,boxes,setBoxes,products,setProducts,setToast}){
   const [adding,setAdding]=useState(false);
   const [saving,setSaving]=useState(false);
   const [blank,setBlank]=useState({name:"",price:"",emoji:"📦",description:"",subcategory:"",sizes:[],stock:-1,is_new:false,on_sale:false,sale_price:0});
-  const [info,setInfo]=useState({business_name:box.business_name,description:box.description,hours:box.hours||"",delivery:box.delivery,delivery_cost:box.delivery_cost,delivery_note:box.delivery_note,mp_link:box.mp_link||""});
+  const [info,setInfo]=useState({business_name:box.business_name,description:box.description,hours:box.hours||"",delivery:box.delivery,delivery_cost:box.delivery_cost,delivery_note:box.delivery_note,mp_link:box.mp_link||"",delivery_min_order:box.delivery_min_order||0});
   const [passForm,setPassForm]=useState({current:"",newp:"",confirm:""});
   const [c1,c2]=catGrad(box.cat);
   const showT=msg=>{setToast(msg);setTimeout(()=>setToast(""),2500);};
@@ -1058,6 +1102,8 @@ function BoxPanel({user,boxes,setBoxes,products,setProducts,setToast}){
 
   const [blankImg,setBlankImg]=useState(null);
   const [blankImgPreview,setBlankImgPreview]=useState(null);
+  const [blankExtraImgs,setBlankExtraImgs]=useState([]);
+  const [blankExtraPreviews,setBlankExtraPreviews]=useState([]);
   const [editImg,setEditImg]=useState(null);
   const [editImgPreview,setEditImgPreview]=useState(null);
   const blankImgRef=useRef();
@@ -1076,6 +1122,7 @@ function BoxPanel({user,boxes,setBoxes,products,setProducts,setToast}){
         delivery_cost:toSave.delivery_cost,
         delivery_note:toSave.delivery_note,
         mp_link:toSave.mp_link,
+        delivery_min_order:toSave.delivery_min_order||0,
       },`id=eq.${box.id}`);
       setBoxes(p=>p.map(b=>b.id===box.id?{...b,...info}:b));
       showT("✓ Información actualizada");
@@ -1098,13 +1145,20 @@ function BoxPanel({user,boxes,setBoxes,products,setProducts,setToast}){
       const res=await sb.from("products").insert(prodData);
       const newProd=Array.isArray(res)?res[0]:res;
       let img_url=null;
+      let extra_images=[];
       if(blankImg&&newProd?.id){
         img_url=await uploadProdImg(blankImg,newProd.id);
-        if(img_url) await sb.from("products").update({img_url},`id=eq.${newProd.id}`);
       }
-      setProducts(p=>({...p,[box.id]:[...(p[box.id]||[]),{...newProd,img_url}]}));
+      for(let i=0;i<blankExtraImgs.length;i++){
+        const url=await uploadProdImg(blankExtraImgs[i],newProd?.id+"_e"+i);
+        if(url) extra_images.push(url);
+      }
+      if(img_url||extra_images.length>0){
+        await sb.from("products").update({img_url,images:extra_images},`id=eq.${newProd.id}`);
+      }
+      setProducts(p=>({...p,[box.id]:[...(p[box.id]||[]),{...newProd,img_url,images:extra_images}]}));
       setBlank({name:"",price:"",emoji:"📦",description:"",subcategory:"",sizes:[],stock:-1,is_new:false,on_sale:false,sale_price:0});
-      setBlankImg(null);setBlankImgPreview(null);
+      setBlankImg(null);setBlankImgPreview(null);setBlankExtraImgs([]);setBlankExtraPreviews([]);
       setAdding(false);
       showT("✓ Producto agregado");
     }catch(e){showT("❌ Error guardando: "+e.message);}
@@ -1256,7 +1310,8 @@ function BoxPanel({user,boxes,setBoxes,products,setProducts,setToast}){
       </>}
       {tab==="info"&&<div style={{background:"rgba(255,255,255,.04)",border:"1px solid rgba(255,255,255,.08)",borderRadius:16,padding:24}}>
         <Field label="Nombre del negocio" value={info.business_name} onChange={v=>setInfo({...info,business_name:v})}/>
-        <Field label="Descripción" value={info.description} onChange={v=>setInfo({...info,description:v})}/>
+        <Field label="Descripción corta" value={info.description} onChange={v=>setInfo({...info,description:v})} help="Se muestra en la card del shopping"/>
+        <Field label="Mensaje de bienvenida" value={info.welcome_msg||""} onChange={v=>setInfo({...info,welcome_msg:v})} placeholder="¡Bienvenidos! Encontrá todo lo que buscás..." help="Se muestra arriba de tu catálogo"/>
         <Field label="Horario" value={info.hours} onChange={v=>setInfo({...info,hours:v})} placeholder="Lun-Sáb 9:00-20:00"/>
         <button className="btn" onClick={saveInfo} disabled={saving} style={{background:`linear-gradient(135deg,${c1},${c2})`,color:"#fff",padding:"11px 24px",fontSize:14}}>Guardar cambios</button>
       </div>}
@@ -1277,10 +1332,12 @@ function BoxPanel({user,boxes,setBoxes,products,setProducts,setToast}){
         </div>
         {info.delivery&&<>
           {/* Costo base */}
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:16}}>
-            <div><Lbl>Costo de envío ($0 = gratis)</Lbl><input className="inp" type="number" value={info.delivery_cost} onChange={e=>setInfo({...info,delivery_cost:Number(e.target.value)})}/></div>
-            <div><Lbl>Nota de envío</Lbl><input className="inp" value={info.delivery_note} onChange={e=>setInfo({...info,delivery_note:e.target.value})} placeholder="Ej: Envío gratis en pedidos +$5000"/></div>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:12}}>
+            <div><Lbl>Costo de envío ($0 = siempre gratis)</Lbl><input className="inp" type="number" value={info.delivery_cost} onChange={e=>setInfo({...info,delivery_cost:Number(e.target.value)})}/></div>
+            <div><Lbl>Compra mínima para envío gratis ($0 = no aplica)</Lbl><input className="inp" type="number" value={info.delivery_min_order||0} onChange={e=>setInfo({...info,delivery_min_order:Number(e.target.value)})} placeholder="5000"/></div>
           </div>
+          <div style={{marginBottom:14}}><Lbl>Nota de envío</Lbl><input className="inp" value={info.delivery_note} onChange={e=>setInfo({...info,delivery_note:e.target.value})} placeholder="Ej: Envío gratis en pedidos mayores a $5000"/></div>
+          {info.delivery_min_order>0&&<div style={{background:"rgba(0,230,118,.06)",border:"1px solid rgba(0,230,118,.15)",borderRadius:10,padding:"10px 14px",marginBottom:14,fontSize:12,color:C.success}}>✓ Envío gratis en compras mayores a {fmt(info.delivery_min_order)}</div>}
           {/* Convenios de envío */}
           <div style={{background:"rgba(0,194,255,.06)",border:"1px solid rgba(0,194,255,.15)",borderRadius:14,padding:18,marginBottom:16}}>
             <p style={{fontWeight:800,fontSize:14,color:C.electric,marginBottom:4}}>📦 Convenios con transportistas</p>
@@ -1310,6 +1367,32 @@ function BoxPanel({user,boxes,setBoxes,products,setProducts,setToast}){
         <button className="btn" onClick={changePass} disabled={saving} style={{background:`linear-gradient(135deg,${c1},${c2})`,color:"#fff",padding:"12px 28px",fontSize:14,marginTop:4}}>Guardar nueva contraseña</button>
         <div style={{marginTop:18,background:"rgba(255,179,0,.06)",border:"1px solid rgba(255,179,0,.2)",borderRadius:12,padding:"12px 16px",fontSize:12,color:"rgba(255,179,0,.8)",lineHeight:1.7}}><b>⚠️ Importante:</b> Anotá tu nueva contraseña. Si la olvidás, el admin del shopping te puede generar una nueva.</div>
       </div>}
+    </div>
+  );
+}
+
+// ─── NEW PROMO FORM ───────────────────────────────────────────────────────────
+function NewPromoForm({shopConfig,saveConfig}){
+  const [form,setForm]=useState({title:"",description:"",expiry:"",color:"linear-gradient(135deg,#FFD200,#FF6F00)",active:true});
+  return(
+    <div style={{marginTop:14,background:"rgba(0,194,255,.04)",border:"1px solid rgba(0,194,255,.15)",borderRadius:14,padding:16}}>
+      <p style={{fontWeight:700,fontSize:13,color:C.electric,marginBottom:12}}>+ Nueva promoción</p>
+      <Field label="Título" value={form.title} onChange={v=>setForm({...form,title:v})} placeholder="🔥 Liquidación de temporada"/>
+      <Field label="Descripción" value={form.description} onChange={v=>setForm({...form,description:v})} placeholder="Hasta 50% de descuento en todos los box"/>
+      <Field label="Válido hasta (opcional)" value={form.expiry} onChange={v=>setForm({...form,expiry:v})} placeholder="31/12/2025"/>
+      <div style={{marginBottom:12}}>
+        <Lbl>Color</Lbl>
+        <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+          {[["linear-gradient(135deg,#FFD200,#FF6F00)","Dorado"],["linear-gradient(135deg,#00C2FF,#0044AA)","Azul"],["linear-gradient(135deg,#FF1744,#C62828)","Rojo"],["linear-gradient(135deg,#00E676,#00A152)","Verde"],["linear-gradient(135deg,#E040FB,#6A1B9A)","Violeta"]].map(([g,name])=>(
+            <div key={g} onClick={()=>setForm({...form,color:g})} style={{width:32,height:32,borderRadius:8,background:g,cursor:"pointer",border:form.color===g?"3px solid #fff":"3px solid transparent",transition:"all .2s"}} title={name}/>
+          ))}
+        </div>
+      </div>
+      <button className="btn" onClick={()=>{
+        if(!form.title)return;
+        saveConfig({...shopConfig,promos:[...(shopConfig.promos||[]),{...form,id:Date.now()}]});
+        setForm({title:"",description:"",expiry:"",color:"linear-gradient(135deg,#FFD200,#FF6F00)",active:true});
+      }} style={{background:"linear-gradient(135deg,#6D28D9,#4C1D95)",color:"#fff",padding:"10px 18px",fontSize:13}}>+ Agregar promoción</button>
     </div>
   );
 }
@@ -1378,7 +1461,7 @@ function AdminPanel({boxes,setBoxes,products,setProducts,shopConfig,setShopConfi
 
   const saveConfig=async(cfg)=>{
     setShopConfig(cfg);
-    await sb.from("shopping_config").update({hours:cfg.hours,banners:cfg.banners,categories:cfg.categories||[]},`id=eq.1`);
+    await sb.from("shopping_config").update({hours:cfg.hours,banners:cfg.banners,categories:cfg.categories||[],promos:cfg.promos||[]},`id=eq.1`);
   };
 
   return(
@@ -1447,7 +1530,7 @@ function AdminPanel({boxes,setBoxes,products,setProducts,shopConfig,setShopConfi
         {/* CATEGORÍAS EDITABLES */}
         <div style={{background:"rgba(255,255,255,.04)",border:"1px solid rgba(255,255,255,.08)",borderRadius:16,padding:24}}>
           <h3 style={{fontWeight:800,fontSize:16,marginBottom:4}}>🏷️ Categorías de boxes</h3>
-          <p style={{color:C.muted,fontSize:12,marginBottom:18}}>Estas son las categorías que aparecen como filtros en la página principal y en los selectores de los boxes.</p>
+          <p style={{color:C.muted,fontSize:12,marginBottom:18}}>Estas son las categorías que aparecen como filtros en la página principal y en los selectores de los box.</p>
           <div style={{display:"flex",flexWrap:"wrap",gap:8,marginBottom:16}}>
             {(shopConfig.categories||["Moda","Gastronomía","Tecnología","Belleza","Deportes","Calzado","Hogar","Lencería","Otra"]).map((cat,i)=>{
               const [c1,c2]=catGrad(cat);
@@ -1517,6 +1600,23 @@ function AdminPanel({boxes,setBoxes,products,setProducts,shopConfig,setShopConfi
             </div>
           </div>
         </div>
+        {/* PROMOCIONES */}
+        <div style={{background:"rgba(255,255,255,.04)",border:"1px solid rgba(255,255,255,.08)",borderRadius:16,padding:24}}>
+          <h3 style={{fontWeight:800,fontSize:16,marginBottom:4}}>🎁 Promociones del shopping</h3>
+          <p style={{color:C.muted,fontSize:12,marginBottom:16}}>Aparecen en la página principal como cards destacadas.</p>
+          {(shopConfig.promos||[]).map((p,i)=>(
+            <div key={i} style={{display:"flex",gap:10,marginBottom:10,alignItems:"center",background:"rgba(255,255,255,.03)",borderRadius:12,padding:"10px 14px",border:"1px solid rgba(255,255,255,.06)"}}>
+              <div style={{width:32,height:32,borderRadius:8,background:p.color,flexShrink:0}}/>
+              <div style={{flex:1}}>
+                <p style={{fontSize:13,fontWeight:700,color:C.light}}>{p.title}</p>
+                <p style={{fontSize:11,color:C.dim}}>{p.description}</p>
+              </div>
+              <button className="btn" onClick={()=>{const ps=[...(shopConfig.promos||[])];ps[i]={...ps[i],active:!ps[i].active};saveConfig({...shopConfig,promos:ps});}} style={{background:p.active?"rgba(255,23,68,.1)":"rgba(0,230,118,.1)",color:p.active?C.danger:C.success,padding:"6px 12px",fontSize:11}}>{p.active?"Ocultar":"Mostrar"}</button>
+              <button className="btn" onClick={()=>saveConfig({...shopConfig,promos:(shopConfig.promos||[]).filter((_,j)=>j!==i)})} style={{background:"rgba(255,23,68,.1)",color:C.danger,padding:"6px 10px",fontSize:11}}>🗑️</button>
+            </div>
+          ))}
+          <NewPromoForm shopConfig={shopConfig} saveConfig={saveConfig}/>
+        </div>
       </div>}
 
       {tab==="crear"&&<div style={{background:"rgba(255,255,255,.04)",border:"1px solid rgba(255,255,255,.08)",borderRadius:16,padding:26}}>
@@ -1568,7 +1668,7 @@ export default function App(){
         if(Array.isArray(boxesData)) setBoxes(boxesData);
         if(Array.isArray(configData)&&configData[0]){
           const cfg=configData[0];
-          setShopConfig({hours:cfg.hours||[],banners:cfg.banners||[]});
+          setShopConfig({hours:cfg.hours||[],banners:cfg.banners||[],promos:cfg.promos||[],categories:cfg.categories||[]});
         }
       }catch(e){
         console.error("Error cargando datos:",e);
@@ -1612,6 +1712,7 @@ export default function App(){
         {view==="cart"      &&<Cart cart={cart} addToCart={addToCart} setView={setView} clearCart={()=>setCart([])}/>}
         {view==="box-panel" &&user&&!user.is_admin&&<BoxPanel user={user} boxes={boxes} setBoxes={setBoxes} products={products} setProducts={setProducts} setToast={showT}/>}
         {view==="admin"     &&user?.is_admin&&<AdminPanel boxes={boxes} setBoxes={setBoxes} products={products} setProducts={setProducts} shopConfig={shopConfig} setShopConfig={setShopConfig} setToast={showT}/>}
+
         <footer style={{background:"rgba(0,0,0,.5)",borderTop:"1px solid rgba(0,194,255,.1)",textAlign:"center",padding:"24px",fontSize:12,marginTop:64,color:C.dim}}>
           <div style={{display:"flex",justifyContent:"center",alignItems:"center",gap:20,flexWrap:"wrap"}}>
             <span><span className="bebas" style={{color:C.electric,fontSize:16,letterSpacing:2}}>BOX SHOP</span> · <a href={MAP} target="_blank" rel="noreferrer" style={{color:C.dim,textDecoration:"none"}}>Av. Rivadavia 135 · San Rafael, Mendoza</a></span>
